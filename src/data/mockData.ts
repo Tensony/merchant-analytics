@@ -14,7 +14,7 @@ function genDays(n: number): string[] {
   return labels;
 }
 
-export function generateDailyData(n = 30): DailyDataPoint[] {
+export function generateDailyData(n = 90): DailyDataPoint[] {
   const dates = genDays(n);
   let base = 7200;
   return dates.map((date, i) => {

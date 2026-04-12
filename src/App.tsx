@@ -1,7 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useMetric } from './hooks/useMetric';
+import { useOrderFilter } from './hooks/useOrderFilter';
+import { useProductSort } from './hooks/useProductSort';
+import { useKpiValues } from './hooks/useKpiValues';
 import { Topbar } from './components/layout/Topbar';
-import { KpiCard } from './components/ui/KpiCard';
+import { KpiCard } from './components/ui/KPICard';
 import { Panel, PanelHeader } from './components/ui/Panel';
 import { RevenueChart } from './components/charts/RevenueChart';
 import { FunnelChart } from './components/charts/FunnelChart';
@@ -9,6 +12,7 @@ import { ChannelDonut } from './components/charts/ChannelDonut';
 import { ProductsTable } from './components/ui/ProductsTable';
 import { GeoList } from './components/ui/GeoList';
 import { OrdersTable } from './components/ui/OrdersTable';
+import { AnomalyToast, triggerAnomalyToast } from './components/ui/AnomalyToast';
 import {
   generateDailyData,
   PRODUCTS,
@@ -20,36 +24,14 @@ import {
 import type { MetricKey } from './types';
 import { clsx } from 'clsx';
 
-const DAILY_DATA = generateDailyData(30);
+const ALL_DATA = generateDailyData(90);
 
-interface KpiDefinition {
-  key: MetricKey;
-  label: string;
-  value: string;
-  delta: string;
-  deltaType: 'up' | 'down';
-  subtext: string;
-  sparkColor: string;
-}
-
-const KPI_DEFS: KpiDefinition[] = [
-  {
-    key: 'revenue', label: 'Total Revenue', value: '$284,920',
-    delta: '12.4%', deltaType: 'up', subtext: 'vs prev period', sparkColor: '#22d98a',
-  },
-  {
-    key: 'orders', label: 'Orders', value: '4,821',
-    delta: '8.1%', deltaType: 'up', subtext: 'vs prev period', sparkColor: '#4d9cf8',
-  },
-  {
-    key: 'aov', label: 'Avg Order Value', value: '$59.10',
-    delta: '3.9%', deltaType: 'up', subtext: 'vs prev period', sparkColor: '#a78bfa',
-  },
-  {
-    key: 'churn', label: 'Churn Rate', value: '2.4%',
-    delta: '0.3pp', deltaType: 'down', subtext: 'vs prev period', sparkColor: '#ff5757',
-  },
-];
+const SPARK_COLORS: Record<MetricKey, string> = {
+  revenue: '#22d98a',
+  orders:  '#4d9cf8',
+  aov:     '#a78bfa',
+  churn:   '#ff5757',
+};
 
 const CHART_TITLE: Record<MetricKey, string> = {
   revenue: 'Revenue over time',
@@ -59,26 +41,60 @@ const CHART_TITLE: Record<MetricKey, string> = {
 };
 
 export default function App() {
-  const { activeMetric, timeRange, chartType, setActiveMetric, setTimeRange, setChartType } = useMetric();
+  const {
+    activeMetric, timeRange, chartType,
+    filteredData,
+    setActiveMetric, setTimeRange, setChartType,
+  } = useMetric();
+
+  const {
+    search, statusFilter, filteredOrders,
+    setSearch, setStatusFilter,
+  } = useOrderFilter(ORDERS);
+
+  const {
+    sortKey, sortDir, sortedProducts, toggleSort,
+  } = useProductSort(PRODUCTS);
+
+  // compute previous period slice for KPI deltas
+  const days = filteredData.length;
+  const previousData = useMemo(
+    () => ALL_DATA.slice(-(days * 2), -days),
+    [days]
+  );
+
+  const kpis = useKpiValues(filteredData, previousData);
 
   const sparkData = useMemo(() => ({
-    revenue: DAILY_DATA.slice(-14).map((d) => d.revenue),
-    orders:  DAILY_DATA.slice(-14).map((d) => d.orders),
-    aov:     DAILY_DATA.slice(-14).map((d) => d.aov),
-    churn:   DAILY_DATA.slice(-14).map((d) => d.churn),
-  }), []);
+    revenue: filteredData.slice(-14).map((d) => d.revenue),
+    orders:  filteredData.slice(-14).map((d) => d.orders),
+    aov:     filteredData.slice(-14).map((d) => d.aov),
+    churn:   filteredData.slice(-14).map((d) => d.churn),
+  }), [filteredData]);
 
-  const hasAnomaly = activeMetric === 'revenue';
+  const hasAnomaly = activeMetric === 'revenue' &&
+    filteredData.some((d) => d.isAnomaly);
+
+  // Fire anomaly toast when switching to revenue and anomaly exists
+  useEffect(() => {
+    if (hasAnomaly) {
+      triggerAnomalyToast('Revenue spike detected — Mar 15 (+187% vs 7-day avg)');
+    }
+  }, [hasAnomaly]);
 
   return (
-    <div className="min-h-screen bg-[#0d0f12] text-[#e8eaf0]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div
+      className="min-h-screen bg-[#0d0f12] text-[#e8eaf0]"
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
+    >
+      <AnomalyToast />
       <Topbar timeRange={timeRange} onTimeRangeChange={setTimeRange} />
 
       <main className="flex flex-col gap-3 p-6">
 
         {/* KPI Row */}
         <div className="grid grid-cols-4 gap-3">
-          {KPI_DEFS.map((kpi) => (
+          {kpis.map((kpi) => (
             <KpiCard
               key={kpi.key}
               metricKey={kpi.key}
@@ -88,14 +104,14 @@ export default function App() {
               deltaType={kpi.deltaType}
               subtext={kpi.subtext}
               sparkData={sparkData[kpi.key]}
-              sparkColor={kpi.sparkColor}
+              sparkColor={SPARK_COLORS[kpi.key]}
               isActive={activeMetric === kpi.key}
               onClick={setActiveMetric}
             />
           ))}
         </div>
 
-        {/* Main + Geo */}
+        {/* Main chart + Geo */}
         <div className="grid grid-cols-[1fr_300px] gap-3">
           <Panel>
             <PanelHeader title={CHART_TITLE[activeMetric]}>
@@ -120,13 +136,14 @@ export default function App() {
             {hasAnomaly && (
               <div className="mx-[18px] mt-3 flex items-center gap-2 bg-amber-950/40 border border-amber-500/40 rounded-lg px-3 py-2 text-xs text-amber-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse flex-shrink-0" />
-                <strong>Anomaly detected:</strong>&nbsp;Revenue spike on Mar 15 (+187% vs 7-day avg). Likely flash sale event.
+                <strong>Anomaly detected:</strong>&nbsp;
+                Revenue spike on Mar 15 (+187% vs 7-day avg). Likely flash sale event.
               </div>
             )}
 
             <div className="p-4">
               <RevenueChart
-                data={DAILY_DATA}
+                data={filteredData}
                 activeMetric={activeMetric}
                 chartType={chartType}
               />
@@ -142,19 +159,13 @@ export default function App() {
         {/* Products + Funnel */}
         <div className="grid grid-cols-[1fr_320px] gap-3">
           <Panel>
-            <PanelHeader title="Top products">
-              <div className="flex gap-0.5 bg-[#1e222b] p-0.5 rounded-md">
-                {['Revenue', 'Units', 'Margin'].map((t) => (
-                  <button
-                    key={t}
-                    className="font-mono text-[11px] px-2.5 py-1 rounded text-[#555c70] hover:text-[#8b90a0] first:bg-[#252a35] first:text-[#e8eaf0] transition-all duration-150"
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </PanelHeader>
-            <ProductsTable products={PRODUCTS} />
+            <PanelHeader title="Top products" />
+            <ProductsTable
+              products={sortedProducts}
+              sortKey={sortKey}
+              sortDir={sortDir}
+              onSort={toggleSort}
+            />
           </Panel>
 
           <Panel>
@@ -167,11 +178,17 @@ export default function App() {
         <div className="grid grid-cols-2 gap-3">
           <Panel>
             <PanelHeader title="Recent orders">
-              <button className="text-[11px] text-[#8b90a0] hover:text-[#e8eaf0] transition-colors">
-                View all ↗
-              </button>
+              <span className="font-mono text-[10px] text-[#555c70]">
+                {filteredOrders.length} results
+              </span>
             </PanelHeader>
-            <OrdersTable orders={ORDERS} />
+            <OrdersTable
+              orders={filteredOrders}
+              search={search}
+              statusFilter={statusFilter}
+              onSearchChange={setSearch}
+              onStatusChange={setStatusFilter}
+            />
           </Panel>
 
           <Panel>
