@@ -56,4 +56,35 @@ export interface ChannelData {
   name: string;
   value: number;
   color: string;
+}
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  country: string;
+  totalSpend: number;
+  orders: number;
+  lastOrder: string;
+  status: 'active' | 'at-risk' | 'churned';
+}
+
+export interface CohortRow {
+  month: string;
+  newCustomers: number;
+  retention: number[];
+}
+
+export interface Campaign {
+  id: string;
+  name: string;
+  channel: 'email' | 'paid' | 'social' | 'sms';
+  status: 'active' | 'paused' | 'completed';
+  budget: number;
+  spent: number;
+  impressions: number;
+  clicks: number;
+  conversions: number;
+  revenue: number;
+  startDate: string;
+  endDate: string;
 }// Type definitions 
