@@ -1,3 +1,4 @@
+import type { Customer, CohortRow, Campaign } from '../types';
 import type {
   DailyDataPoint, Product, GeoRegion,
   Order, FunnelStep, ChannelData
@@ -73,4 +74,61 @@ export const CHANNEL_DATA: ChannelData[] = [
   { name: 'Social',         value: 10, color: '#f5a623' },
   { name: 'Direct',         value: 6,  color: '#f06291' },
   { name: 'Referral',       value: 4,  color: '#4dd0e1' },
+];
+
+export const CUSTOMERS: Customer[] = [
+  { id: 'c1', name: 'Alex Mwale',       email: 'alex@email.com',   country: '🇿🇲 Zambia',         totalSpend: 2840,  orders: 12, lastOrder: 'Mar 30', status: 'active'   },
+  { id: 'c2', name: 'Sarah Chen',       email: 'sarah@email.com',  country: '🇨🇳 China',          totalSpend: 1290,  orders: 6,  lastOrder: 'Mar 30', status: 'active'   },
+  { id: 'c3', name: 'James Osei',       email: 'james@email.com',  country: '🇬🇭 Ghana',          totalSpend: 4120,  orders: 18, lastOrder: 'Mar 29', status: 'active'   },
+  { id: 'c4', name: 'Maria Santos',     email: 'maria@email.com',  country: '🇧🇷 Brazil',         totalSpend: 340,   orders: 2,  lastOrder: 'Mar 29', status: 'at-risk'  },
+  { id: 'c5', name: 'Tom Nakamura',     email: 'tom@email.com',    country: '🇯🇵 Japan',          totalSpend: 6780,  orders: 31, lastOrder: 'Mar 28', status: 'active'   },
+  { id: 'c6', name: 'Fatima Al-Hassan', email: 'fatima@email.com', country: '🇦🇪 UAE',            totalSpend: 5200,  orders: 24, lastOrder: 'Mar 28', status: 'active'   },
+  { id: 'c7', name: 'David Park',       email: 'david@email.com',  country: '🇰🇷 South Korea',   totalSpend: 890,   orders: 4,  lastOrder: 'Feb 14', status: 'at-risk'  },
+  { id: 'c8', name: 'Chioma Eze',       email: 'chioma@email.com', country: '🇳🇬 Nigeria',        totalSpend: 9100,  orders: 44, lastOrder: 'Mar 27', status: 'active'   },
+  { id: 'c9', name: 'Lucas Bernard',    email: 'lucas@email.com',  country: '🇫🇷 France',         totalSpend: 210,   orders: 1,  lastOrder: 'Jan 05', status: 'churned'  },
+  { id:'c10', name: 'Amara Diallo',     email: 'amara@email.com',  country: '🇸🇳 Senegal',        totalSpend: 1540,  orders: 8,  lastOrder: 'Mar 25', status: 'active'   },
+  { id:'c11', name: 'Nina Petrova',     email: 'nina@email.com',   country: '🇷🇺 Russia',         totalSpend: 3300,  orders: 15, lastOrder: 'Mar 20', status: 'active'   },
+  { id:'c12', name: 'Omar Hassan',      email: 'omar@email.com',   country: '🇪🇬 Egypt',          totalSpend: 450,   orders: 3,  lastOrder: 'Jan 18', status: 'churned'  },
+];
+
+export const COHORT_DATA: CohortRow[] = [
+  { month: 'Oct 23', newCustomers: 312, retention: [100, 62, 48, 41, 35, 31] },
+  { month: 'Nov 23', newCustomers: 284, retention: [100, 58, 44, 38, 33]     },
+  { month: 'Dec 23', newCustomers: 401, retention: [100, 71, 55, 47]          },
+  { month: 'Jan 24', newCustomers: 356, retention: [100, 64, 50]              },
+  { month: 'Feb 24', newCustomers: 298, retention: [100, 60]                  },
+  { month: 'Mar 24', newCustomers: 341, retention: [100]                      },
+];
+
+export const CAMPAIGNS: Campaign[] = [
+  {
+    id: 'camp1', name: 'Spring Sale Email Blast', channel: 'email',
+    status: 'completed', budget: 2000, spent: 1840,
+    impressions: 48200, clicks: 3840, conversions: 412, revenue: 24720,
+    startDate: 'Mar 01', endDate: 'Mar 15',
+  },
+  {
+    id: 'camp2', name: 'Google Ads — Headphones', channel: 'paid',
+    status: 'active', budget: 5000, spent: 3120,
+    impressions: 124000, clicks: 6200, conversions: 310, revenue: 18600,
+    startDate: 'Mar 10', endDate: 'Apr 10',
+  },
+  {
+    id: 'camp3', name: 'Instagram Reels — Chairs', channel: 'social',
+    status: 'active', budget: 1500, spent: 890,
+    impressions: 84000, clicks: 2100, conversions: 98, revenue: 8820,
+    startDate: 'Mar 20', endDate: 'Apr 20',
+  },
+  {
+    id: 'camp4', name: 'SMS Flash Sale', channel: 'sms',
+    status: 'completed', budget: 800, spent: 800,
+    impressions: 12400, clicks: 1860, conversions: 224, revenue: 13440,
+    startDate: 'Mar 15', endDate: 'Mar 15',
+  },
+  {
+    id: 'camp5', name: 'Retargeting — Cart Abandon', channel: 'paid',
+    status: 'paused', budget: 3000, spent: 1200,
+    impressions: 56000, clicks: 2800, conversions: 140, revenue: 8400,
+    startDate: 'Mar 05', endDate: 'Apr 05',
+  },
 ];
