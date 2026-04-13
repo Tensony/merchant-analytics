@@ -1,4 +1,6 @@
 import { useMemo, useEffect } from 'react';
+import { useApi } from '../hooks/useApi';
+import { api } from '../services/api';
 import { useDashboardStore } from '../store/useDashboardStore';
 import { useUrlState } from '../hooks/useUrlState';
 import { useOrderFilter } from '../hooks/useOrderFilter';
@@ -22,8 +24,12 @@ import {
   FUNNEL_STEPS,
   CHANNEL_DATA,
 } from '../data/mockData';
-import type { MetricKey, DailyDataPoint } from '../types';
+import type { MetricKey, DailyDataPoint, Order, Product } from '../types';
 import { clsx } from 'clsx';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 
 const ALL_DATA = generateDailyData(90);
 
@@ -45,28 +51,69 @@ const CHART_TITLE: Record<MetricKey, string> = {
   churn:   'Churn rate over time',
 };
 
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 export function OverviewPage() {
-  // Sync URL params ↔ store
+  // ── 1. URL state sync ────────────────────────────────────────────────────
   useUrlState();
 
+  // ── 2. Global store ──────────────────────────────────────────────────────
   const {
-    activeMetric, timeRange, chartType,
-    setActiveMetric, setTimeRange, setChartType,
+    activeMetric,
+    timeRange,
+    chartType,
+    setActiveMetric,
+    setTimeRange,
+    setChartType,
   } = useDashboardStore();
 
-  const filteredData = useMemo<DailyDataPoint[]>(() => {
-    const days = RANGE_DAYS[timeRange] ?? 30;
-    return ALL_DATA.slice(-days);
-  }, [timeRange]);
-
+  // ── 3. Local filter state (must be declared before API calls that use it)
   const {
-    search, statusFilter, filteredOrders,
-    setSearch, setStatusFilter,
+    search,
+    statusFilter,
+    filteredOrders,
+    setSearch,
+    setStatusFilter,
   } = useOrderFilter(ORDERS);
 
-  const { sortKey, sortDir, sortedProducts, toggleSort } = useProductSort(PRODUCTS);
+  // ── 4. API calls ─────────────────────────────────────────────────────────
+  const { data: metricsData, loading: metricsLoading } = useApi(
+    () => api.getMetrics(timeRange),
+    [timeRange]
+  );
+
+  const { data: ordersData } = useApi(
+    () => api.getOrders(
+      statusFilter !== 'all' ? statusFilter : undefined,
+      search || undefined
+    ),
+    [statusFilter, search]
+  );
+
+  const { data: productsData } = useApi(
+    () => api.getProducts(),
+    []
+  );
+
+  // ── 5. Resolve live vs mock data ─────────────────────────────────────────
+  const liveOrders   = (ordersData   as Order[]   | null) ?? ORDERS;
+  const liveProducts = (productsData as Product[] | null) ?? PRODUCTS;
+
+  // ── 6. Derived data ──────────────────────────────────────────────────────
+  const { sortKey, sortDir, sortedProducts, toggleSort } = useProductSort(liveProducts);
+
+  const filteredData = useMemo<DailyDataPoint[]>(() => {
+    if (metricsData) {
+      return (metricsData as { series: DailyDataPoint[] }).series;
+    }
+    const days = RANGE_DAYS[timeRange] ?? 30;
+    return ALL_DATA.slice(-days);
+  }, [metricsData, timeRange]);
 
   const days = filteredData.length;
+
   const previousData = useMemo<DailyDataPoint[]>(
     () => ALL_DATA.slice(-(days * 2), -days),
     [days]
@@ -81,29 +128,55 @@ export function OverviewPage() {
     churn:   filteredData.slice(-14).map((d: DailyDataPoint) => d.churn),
   }), [filteredData]);
 
-  const hasAnomaly = activeMetric === 'revenue' &&
+  const hasAnomaly =
+    activeMetric === 'revenue' &&
     filteredData.some((d: DailyDataPoint) => d.isAnomaly);
 
+  // ── 7. Side effects ──────────────────────────────────────────────────────
   useEffect(() => {
     if (hasAnomaly) {
       triggerAnomalyToast('Revenue spike detected — Mar 15 (+187% vs 7-day avg)');
     }
   }, [hasAnomaly]);
 
+  // ── 8. Handlers ──────────────────────────────────────────────────────────
   function handleExport() {
-    exportToCsv('orders-export', filteredOrders.map((o) => ({
-      id:       o.id,
-      customer: o.customer,
-      amount:   o.amount,
-      status:   o.status,
-      date:     o.date,
-    })));
+    exportToCsv(
+      'orders-export',
+      (ordersData ? liveOrders : filteredOrders).map((o) => ({
+        id:       o.id,
+        customer: o.customer,
+        amount:   o.amount,
+        status:   o.status,
+        date:     o.date,
+      }))
+    );
   }
 
+  function handleShareView() {
+    navigator.clipboard.writeText(window.location.href);
+    triggerAnomalyToast('Link copied to clipboard!');
+  }
+
+  // ── 9. Render ─────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col gap-3 p-6">
 
-      {/* Page header */}
+      {/* Loading indicator */}
+      {metricsLoading && (
+        <div
+          className="fixed top-4 right-4 font-mono text-[11px] px-3 py-1.5 rounded-lg z-50"
+          style={{
+            backgroundColor: 'var(--surface2)',
+            border: '1px solid var(--border)',
+            color: 'var(--text3)',
+          }}
+        >
+          ⟳ Loading...
+        </div>
+      )}
+
+      {/* ── Page header ─────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-1">
         <div>
           <h1
@@ -118,34 +191,43 @@ export function OverviewPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Export button */}
+          {/* Export CSV */}
           <button
             onClick={handleExport}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all hover:bg-[var(--surface2)]"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all"
             style={{
               borderColor: 'var(--border)',
               color: 'var(--text2)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--surface2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
             ↓ Export CSV
           </button>
 
-          {/* Shareable link */}
+          {/* Share view */}
           <button
-            onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
-              triggerAnomalyToast('Link copied to clipboard!');
-            }}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all hover:bg-[var(--surface2)]"
+            onClick={handleShareView}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all"
             style={{
               borderColor: 'var(--border)',
               color: 'var(--text2)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--surface2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
             ⎋ Share view
           </button>
 
-          {/* Time range */}
+          {/* Time range selector */}
           <div
             className="flex gap-0.5 p-0.5 rounded-lg"
             style={{
@@ -157,13 +239,13 @@ export function OverviewPage() {
               <button
                 key={r}
                 onClick={() => setTimeRange(r)}
-                className={clsx(
-                  'font-mono text-[11px] px-3 py-1.5 rounded-md transition-all duration-150',
-                )}
+                className="font-mono text-[11px] px-3 py-1.5 rounded-md transition-all duration-150"
                 style={{
                   backgroundColor: timeRange === r ? 'var(--surface3)' : 'transparent',
-                  color: timeRange === r ? 'var(--text)' : 'var(--text3)',
-                  border: timeRange === r ? '1px solid var(--border2)' : '1px solid transparent',
+                  color:           timeRange === r ? 'var(--text)'  : 'var(--text3)',
+                  border:          timeRange === r
+                    ? '1px solid var(--border2)'
+                    : '1px solid transparent',
                 }}
               >
                 {r}
@@ -173,7 +255,7 @@ export function OverviewPage() {
         </div>
       </div>
 
-      {/* KPI Row */}
+      {/* ── KPI cards ───────────────────────────────────────────────────── */}
       <div className="grid grid-cols-4 gap-3">
         {kpis.map((kpi) => (
           <KpiCard
@@ -192,7 +274,7 @@ export function OverviewPage() {
         ))}
       </div>
 
-      {/* Main chart + Geo */}
+      {/* ── Main chart + Geo ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-[1fr_300px] gap-3">
         <Panel>
           <PanelHeader title={CHART_TITLE[activeMetric]}>
@@ -207,7 +289,7 @@ export function OverviewPage() {
                   className="font-mono text-[11px] px-2.5 py-1 rounded transition-all duration-150 capitalize"
                   style={{
                     backgroundColor: chartType === t ? 'var(--surface3)' : 'transparent',
-                    color: chartType === t ? 'var(--text)' : 'var(--text3)',
+                    color:           chartType === t ? 'var(--text)'  : 'var(--text3)',
                   }}
                 >
                   {t}
@@ -239,7 +321,7 @@ export function OverviewPage() {
         </Panel>
       </div>
 
-      {/* Products + Funnel */}
+      {/* ── Products + Funnel ────────────────────────────────────────────── */}
       <div className="grid grid-cols-[1fr_320px] gap-3">
         <Panel>
           <PanelHeader title="Top products" />
@@ -257,7 +339,7 @@ export function OverviewPage() {
         </Panel>
       </div>
 
-      {/* Orders + Channel */}
+      {/* ── Orders + Channel ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3">
         <Panel>
           <PanelHeader title="Recent orders">
@@ -266,14 +348,20 @@ export function OverviewPage() {
                 className="font-mono text-[10px]"
                 style={{ color: 'var(--text3)' }}
               >
-                {filteredOrders.length} results
+                {ordersData ? liveOrders.length : filteredOrders.length} results
               </span>
               <button
                 onClick={handleExport}
-                className="font-mono text-[10px] px-2 py-0.5 rounded border transition-all hover:bg-[var(--surface2)]"
+                className="font-mono text-[10px] px-2 py-0.5 rounded border transition-all"
                 style={{
                   borderColor: 'var(--border)',
                   color: 'var(--text3)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--surface2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
                 }}
               >
                 ↓ CSV
@@ -281,7 +369,7 @@ export function OverviewPage() {
             </div>
           </PanelHeader>
           <OrdersTable
-            orders={filteredOrders}
+            orders={ordersData ? liveOrders : filteredOrders}
             search={search}
             statusFilter={statusFilter}
             onSearchChange={setSearch}
@@ -294,6 +382,7 @@ export function OverviewPage() {
           <ChannelDonut data={CHANNEL_DATA} />
         </Panel>
       </div>
+
     </div>
   );
 }
