@@ -1,5 +1,6 @@
 import { useMemo, useEffect } from 'react';
-import { useMetric } from '../hooks/useMetric';
+import { useDashboardStore } from '../store/useDashboardStore';
+import { useUrlState } from '../hooks/useUrlState';
 import { useOrderFilter } from '../hooks/useOrderFilter';
 import { useProductSort } from '../hooks/useProductSort';
 import { useKpiValues } from '../hooks/useKpiValues';
@@ -12,7 +13,7 @@ import { ProductsTable } from '../components/ui/ProductsTable';
 import { GeoList } from '../components/ui/GeoList';
 import { OrdersTable } from '../components/ui/OrdersTable';
 import { triggerAnomalyToast } from '../components/ui/AnomalyToast';
-import type { MetricKey, DailyDataPoint } from '../types';
+import { exportToCsv } from '../utils/exportCsv';
 import {
   generateDailyData,
   PRODUCTS,
@@ -21,9 +22,14 @@ import {
   FUNNEL_STEPS,
   CHANNEL_DATA,
 } from '../data/mockData';
+import type { MetricKey, DailyDataPoint } from '../types';
 import { clsx } from 'clsx';
 
 const ALL_DATA = generateDailyData(90);
+
+const RANGE_DAYS: Record<string, number> = {
+  '7d': 7, '30d': 30, '90d': 90, 'ytd': 90,
+};
 
 const SPARK_COLORS: Record<MetricKey, string> = {
   revenue: '#22d98a',
@@ -40,23 +46,28 @@ const CHART_TITLE: Record<MetricKey, string> = {
 };
 
 export function OverviewPage() {
+  // Sync URL params ↔ store
+  useUrlState();
+
   const {
     activeMetric, timeRange, chartType,
-    filteredData,
     setActiveMetric, setTimeRange, setChartType,
-  } = useMetric();
+  } = useDashboardStore();
+
+  const filteredData = useMemo<DailyDataPoint[]>(() => {
+    const days = RANGE_DAYS[timeRange] ?? 30;
+    return ALL_DATA.slice(-days);
+  }, [timeRange]);
 
   const {
     search, statusFilter, filteredOrders,
     setSearch, setStatusFilter,
   } = useOrderFilter(ORDERS);
 
-  const {
-    sortKey, sortDir, sortedProducts, toggleSort,
-  } = useProductSort(PRODUCTS);
+  const { sortKey, sortDir, sortedProducts, toggleSort } = useProductSort(PRODUCTS);
 
   const days = filteredData.length;
-  const previousData = useMemo(
+  const previousData = useMemo<DailyDataPoint[]>(
     () => ALL_DATA.slice(-(days * 2), -days),
     [days]
   );
@@ -64,14 +75,14 @@ export function OverviewPage() {
   const kpis = useKpiValues(filteredData, previousData);
 
   const sparkData = useMemo(() => ({
-  revenue: filteredData.slice(-14).map((d: DailyDataPoint) => d.revenue),
-  orders:  filteredData.slice(-14).map((d: DailyDataPoint) => d.orders),
-  aov:     filteredData.slice(-14).map((d: DailyDataPoint) => d.aov),
-  churn:   filteredData.slice(-14).map((d: DailyDataPoint) => d.churn),
-}), [filteredData]);
+    revenue: filteredData.slice(-14).map((d: DailyDataPoint) => d.revenue),
+    orders:  filteredData.slice(-14).map((d: DailyDataPoint) => d.orders),
+    aov:     filteredData.slice(-14).map((d: DailyDataPoint) => d.aov),
+    churn:   filteredData.slice(-14).map((d: DailyDataPoint) => d.churn),
+  }), [filteredData]);
 
   const hasAnomaly = activeMetric === 'revenue' &&
-    filteredData.some((d) => d.isAnomaly);
+    filteredData.some((d: DailyDataPoint) => d.isAnomaly);
 
   useEffect(() => {
     if (hasAnomaly) {
@@ -79,35 +90,86 @@ export function OverviewPage() {
     }
   }, [hasAnomaly]);
 
+  function handleExport() {
+    exportToCsv('orders-export', filteredOrders.map((o) => ({
+      id:       o.id,
+      customer: o.customer,
+      amount:   o.amount,
+      status:   o.status,
+      date:     o.date,
+    })));
+  }
+
   return (
     <div className="flex flex-col gap-3 p-6">
 
       {/* Page header */}
       <div className="flex items-center justify-between mb-1">
         <div>
-          <h1 className="font-['Syne',sans-serif] text-xl font-bold text-[#e8eaf0] tracking-tight">
+          <h1
+            className="font-['Syne',sans-serif] text-xl font-bold tracking-tight"
+            style={{ color: 'var(--text)' }}
+          >
             Overview
           </h1>
-          <p className="text-xs text-[#555c70] mt-0.5">
+          <p className="text-xs mt-0.5" style={{ color: 'var(--text3)' }}>
             Last updated: Mar 30, 2024 · 14:22 UTC
           </p>
         </div>
-        {/* Time range */}
-        <div className="flex gap-0.5 bg-[#1e222b] p-0.5 rounded-lg border border-[#2a2f3d]">
-          {(['7d', '30d', '90d', 'ytd'] as const).map((r) => (
-            <button
-              key={r}
-              onClick={() => setTimeRange(r)}
-              className={clsx(
-                'font-mono text-[11px] px-3 py-1.5 rounded-md transition-all duration-150',
-                timeRange === r
-                  ? 'bg-[#252a35] text-[#e8eaf0] border border-[#363d50]'
-                  : 'text-[#555c70] hover:text-[#8b90a0]'
-              )}
-            >
-              {r}
-            </button>
-          ))}
+
+        <div className="flex items-center gap-2">
+          {/* Export button */}
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all hover:bg-[var(--surface2)]"
+            style={{
+              borderColor: 'var(--border)',
+              color: 'var(--text2)',
+            }}
+          >
+            ↓ Export CSV
+          </button>
+
+          {/* Shareable link */}
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              triggerAnomalyToast('Link copied to clipboard!');
+            }}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all hover:bg-[var(--surface2)]"
+            style={{
+              borderColor: 'var(--border)',
+              color: 'var(--text2)',
+            }}
+          >
+            ⎋ Share view
+          </button>
+
+          {/* Time range */}
+          <div
+            className="flex gap-0.5 p-0.5 rounded-lg"
+            style={{
+              backgroundColor: 'var(--surface2)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            {(['7d', '30d', '90d', 'ytd'] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setTimeRange(r)}
+                className={clsx(
+                  'font-mono text-[11px] px-3 py-1.5 rounded-md transition-all duration-150',
+                )}
+                style={{
+                  backgroundColor: timeRange === r ? 'var(--surface3)' : 'transparent',
+                  color: timeRange === r ? 'var(--text)' : 'var(--text3)',
+                  border: timeRange === r ? '1px solid var(--border2)' : '1px solid transparent',
+                }}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -134,17 +196,19 @@ export function OverviewPage() {
       <div className="grid grid-cols-[1fr_300px] gap-3">
         <Panel>
           <PanelHeader title={CHART_TITLE[activeMetric]}>
-            <div className="flex gap-0.5 bg-[#1e222b] p-0.5 rounded-md">
+            <div
+              className="flex gap-0.5 p-0.5 rounded-md"
+              style={{ backgroundColor: 'var(--surface2)' }}
+            >
               {(['bar', 'line'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setChartType(t)}
-                  className={clsx(
-                    'font-mono text-[11px] px-2.5 py-1 rounded transition-all duration-150 capitalize',
-                    chartType === t
-                      ? 'bg-[#252a35] text-[#e8eaf0]'
-                      : 'text-[#555c70] hover:text-[#8b90a0]'
-                  )}
+                  className="font-mono text-[11px] px-2.5 py-1 rounded transition-all duration-150 capitalize"
+                  style={{
+                    backgroundColor: chartType === t ? 'var(--surface3)' : 'transparent',
+                    color: chartType === t ? 'var(--text)' : 'var(--text3)',
+                  }}
                 >
                   {t}
                 </button>
@@ -181,6 +245,9 @@ export function OverviewPage() {
           <PanelHeader title="Top products" />
           <ProductsTable
             products={sortedProducts}
+            sortKey={sortKey}
+            sortDir={sortDir}
+            onSort={toggleSort}
           />
         </Panel>
 
@@ -194,12 +261,31 @@ export function OverviewPage() {
       <div className="grid grid-cols-2 gap-3">
         <Panel>
           <PanelHeader title="Recent orders">
-            <span className="font-mono text-[10px] text-[#555c70]">
-              {filteredOrders.length} results
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className="font-mono text-[10px]"
+                style={{ color: 'var(--text3)' }}
+              >
+                {filteredOrders.length} results
+              </span>
+              <button
+                onClick={handleExport}
+                className="font-mono text-[10px] px-2 py-0.5 rounded border transition-all hover:bg-[var(--surface2)]"
+                style={{
+                  borderColor: 'var(--border)',
+                  color: 'var(--text3)',
+                }}
+              >
+                ↓ CSV
+              </button>
+            </div>
           </PanelHeader>
           <OrdersTable
             orders={filteredOrders}
+            search={search}
+            statusFilter={statusFilter}
+            onSearchChange={setSearch}
+            onStatusChange={setStatusFilter}
           />
         </Panel>
 

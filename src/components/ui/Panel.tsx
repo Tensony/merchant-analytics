@@ -1,5 +1,4 @@
 import { type ReactNode } from 'react';
-import { clsx } from 'clsx';
 
 interface PanelProps {
   children: ReactNode;
@@ -8,7 +7,13 @@ interface PanelProps {
 
 export function Panel({ children, className }: PanelProps) {
   return (
-    <div className={clsx('bg-[#161920] border border-[#2a2f3d] rounded-xl overflow-hidden', className)}>
+    <div
+      className={`rounded-xl overflow-hidden ${className ?? ''}`}
+      style={{
+        backgroundColor: 'var(--surface)',
+        border: '1px solid var(--border)',
+      }}
+    >
       {children}
     </div>
   );
@@ -21,11 +26,19 @@ interface PanelHeaderProps {
 
 export function PanelHeader({ title, children }: PanelHeaderProps) {
   return (
-    <div className="flex items-center justify-between px-[18px] py-3.5 border-b border-[#2a2f3d]">
-      <h3 className="font-['Syne',sans-serif] text-[13px] font-semibold text-[#e8eaf0] tracking-tight">
+    <div
+      className="flex items-center justify-between px-[18px] py-3.5"
+      style={{ borderBottom: '1px solid var(--border)' }}
+    >
+      <h3
+        className="font-['Syne',sans-serif] text-[13px] font-semibold tracking-tight"
+        style={{ color: 'var(--text)' }}
+      >
         {title}
       </h3>
-      {children && <div className="flex items-center gap-2">{children}</div>}
+      {children && (
+        <div className="flex items-center gap-2">{children}</div>
+      )}
     </div>
   );
 }
