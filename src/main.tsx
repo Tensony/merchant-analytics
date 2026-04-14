@@ -2,7 +2,11 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
-import { AppLayout } from './components/layout/AppLayout';
+
+import { AppLayout }      from './components/layout/AppLayout';
+import { PublicLayout }   from './components/layout/PublicLayout';
+import { LandingPage }    from './pages/LandingPage';
+import { LoginPage }      from './pages/LoginPage';
 import { OverviewPage }   from './pages/OverviewPage';
 import { ProductsPage }   from './pages/ProductsPage';
 import { CustomersPage }  from './pages/CustomersPage';
@@ -12,13 +16,21 @@ import { SettingsPage }   from './pages/SettingsPage';
 const router = createBrowserRouter([
   {
     path: '/',
+    element: <PublicLayout />,
+    children: [
+      { index: true,  element: <LandingPage /> },
+      { path: 'login', element: <LoginPage />  },
+    ],
+  },
+  {
+    path: '/app',
     element: <AppLayout />,
     children: [
-      { index: true,        element: <OverviewPage />   },
-      { path: 'products',   element: <ProductsPage />   },
-      { path: 'customers',  element: <CustomersPage />  },
-      { path: 'campaigns',  element: <CampaignsPage />  },
-      { path: 'settings',   element: <SettingsPage />   },
+      { index: true,          element: <OverviewPage />  },
+      { path: 'products',     element: <ProductsPage />  },
+      { path: 'customers',    element: <CustomersPage /> },
+      { path: 'campaigns',    element: <CampaignsPage /> },
+      { path: 'settings',     element: <SettingsPage />  },
     ],
   },
 ]);

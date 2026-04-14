@@ -4,19 +4,19 @@ import { ThemeToggle } from '../ui/ThemeToggle';
 
 interface NavItem {
   label: string;
-  path: string;
-  icon: string;
+  path:  string;
+  icon:  string;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Overview',  path: '/',          icon: '▦' },
-  { label: 'Products',  path: '/products',  icon: '◫' },
-  { label: 'Customers', path: '/customers', icon: '◉' },
-  { label: 'Campaigns', path: '/campaigns', icon: '◈' },
+  { label: 'Overview',  path: '/app',              icon: '▦' },
+  { label: 'Products',  path: '/app/products',     icon: '◫' },
+  { label: 'Customers', path: '/app/customers',    icon: '◉' },
+  { label: 'Campaigns', path: '/app/campaigns',    icon: '◈' },
 ];
 
 const BOTTOM_ITEMS: NavItem[] = [
-  { label: 'Settings', path: '/settings', icon: '◎' },
+  { label: 'Settings', path: '/app/settings', icon: '◎' },
 ];
 
 export function Sidebar() {
@@ -30,12 +30,14 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--border)' }}>
-        <span
-          className="font-['Syne',sans-serif] text-[15px] font-bold tracking-tight"
-          style={{ color: 'var(--text)' }}
-        >
-          merchant<span className="text-emerald-400">.</span>analytics
-        </span>
+        <NavLink to="/">
+          <span
+            className="font-['Syne',sans-serif] text-[15px] font-bold tracking-tight"
+            style={{ color: 'var(--text)' }}
+          >
+            merchant<span className="text-emerald-400">.</span>analytics
+          </span>
+        </NavLink>
         <div className="mt-1.5">
           <span className="bg-emerald-950 text-emerald-400 font-mono text-[9px] font-medium px-1.5 py-0.5 rounded tracking-widest">
             LIVE
@@ -55,7 +57,7 @@ export function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
-            end={item.path === '/'}
+            end={item.path === '/app'}
             className={({ isActive }) =>
               clsx(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150',
@@ -110,16 +112,10 @@ export function Sidebar() {
               TM
             </div>
             <div className="overflow-hidden">
-              <p
-                className="text-xs font-medium truncate"
-                style={{ color: 'var(--text)' }}
-              >
+              <p className="text-xs font-medium truncate" style={{ color: 'var(--text)' }}>
                 Tenson M.
               </p>
-              <p
-                className="text-[10px] font-mono truncate"
-                style={{ color: 'var(--text3)' }}
-              >
+              <p className="text-[10px] font-mono truncate" style={{ color: 'var(--text3)' }}>
                 Admin
               </p>
             </div>
