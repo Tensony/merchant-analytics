@@ -1,4 +1,9 @@
 import { useMemo, useEffect } from 'react';
+import { useState } from 'react';
+import { useRealtimeOrders } from '../hooks/useRealtimeOrders';
+import { LiveOrderFeed } from '../components/ui/LiveOrderFeed';
+import { DrillDownModal } from '../components/ui/DrillDownModal';
+import type { DailyDataPoint as DrillPoint } from '../types';
 import { useApi } from '../hooks/useApi';
 import { api } from '../services/api';
 import { useDashboardStore } from '../store/useDashboardStore';
@@ -58,6 +63,8 @@ const CHART_TITLE: Record<MetricKey, string> = {
 export function OverviewPage() {
   // ── 1. URL state sync ────────────────────────────────────────────────────
   useUrlState();
+  const { orders: liveOrders_, connected, orderCount, clearOrders } = useRealtimeOrders();
+  const [drillPoint, setDrillPoint] = useState<DrillPoint | null>(null);
 
   // ── 2. Global store ──────────────────────────────────────────────────────
   const {
@@ -311,6 +318,7 @@ export function OverviewPage() {
               data={filteredData}
               activeMetric={activeMetric}
               chartType={chartType}
+              onBarClick={(point) => setDrillPoint(point)}
             />
           </div>
         </Panel>
@@ -339,30 +347,20 @@ export function OverviewPage() {
         </Panel>
       </div>
 
-      {/* ── Orders + Channel ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* ── Orders + Live Feed + Channel ────────────────────────────────── */}
+      <div className="grid grid-cols-3 gap-3">
         <Panel>
           <PanelHeader title="Recent orders">
             <div className="flex items-center gap-2">
-              <span
-                className="font-mono text-[10px]"
-                style={{ color: 'var(--text3)' }}
-              >
+              <span className="font-mono text-[10px]" style={{ color: 'var(--text3)' }}>
                 {ordersData ? liveOrders.length : filteredOrders.length} results
               </span>
               <button
                 onClick={handleExport}
                 className="font-mono text-[10px] px-2 py-0.5 rounded border transition-all"
-                style={{
-                  borderColor: 'var(--border)',
-                  color: 'var(--text3)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--surface2)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
+                style={{ borderColor: 'var(--border)', color: 'var(--text3)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--surface2)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
               >
                 ↓ CSV
               </button>
@@ -378,11 +376,41 @@ export function OverviewPage() {
         </Panel>
 
         <Panel>
+          <PanelHeader title="Live order feed">
+            <div className="flex items-center gap-2">
+              {orderCount > 0 && (
+                <span
+                  className="font-mono text-[10px] px-1.5 py-0.5 rounded"
+                  style={{
+                    backgroundColor: '#22d98a22',
+                    color: '#22d98a',
+                  }}
+                >
+                  +{orderCount} today
+                </span>
+              )}
+            </div>
+          </PanelHeader>
+          <LiveOrderFeed
+            orders={liveOrders_}
+            connected={connected}
+            onClear={clearOrders}
+          />
+        </Panel>
+
+        <Panel>
           <PanelHeader title="Channel performance" />
           <ChannelDonut data={CHANNEL_DATA} />
         </Panel>
       </div>
 
+      {/* ── Drill-down modal ─────────────────────────────────────────────── */}
+      {drillPoint && (
+        <DrillDownModal
+          point={drillPoint}
+          onClose={() => setDrillPoint(null)}
+        />
+      )}
     </div>
   );
 }

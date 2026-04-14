@@ -7,9 +7,10 @@ import type { DailyDataPoint, MetricKey, ChartType } from '../../types';
 import { formatCompact, formatPct, formatAOV } from '../../utils/formatters';
 
 interface RevenueChartProps {
-  data: DailyDataPoint[];
-  activeMetric: MetricKey;
-  chartType: ChartType;
+  data:          DailyDataPoint[];
+  activeMetric:  MetricKey;
+  chartType:     ChartType;
+  onBarClick?:   (point: DailyDataPoint) => void;
 }
 
 const METRIC_COLOR: Record<MetricKey, string> = {
@@ -29,36 +30,50 @@ function formatYAxis(value: number, metric: MetricKey): string {
 function CustomTooltip({ active, payload, label, metric }: any) {
   if (!active || !payload?.length) return null;
   const point = payload[0].payload as DailyDataPoint;
-  const value = payload[0].value as number;
+  const value = payload[0].value  as number;
   const color = METRIC_COLOR[metric as MetricKey];
 
   const displayValue =
-    metric === 'revenue' ? formatCompact(value) :
-    metric === 'aov'     ? formatAOV(value) :
-    metric === 'churn'   ? formatPct(value) :
+    metric === 'revenue' ? formatCompact(value)   :
+    metric === 'aov'     ? formatAOV(value)        :
+    metric === 'churn'   ? formatPct(value)        :
     value.toLocaleString();
 
   return (
-    <div className="bg-[#161920] border border-[#363d50] rounded-lg p-3 shadow-xl text-sm min-w-[150px]">
-      <p className="font-mono text-[10px] text-[#555c70] mb-1">{label}</p>
-      <p className="font-['Syne',sans-serif] text-lg font-bold" style={{ color }}>
+    <div
+      className="rounded-lg p-3 shadow-xl text-sm min-w-[160px]"
+      style={{
+        backgroundColor: 'var(--surface)',
+        border: '1px solid var(--border2)',
+      }}
+    >
+      <p className="font-mono text-[10px] mb-1" style={{ color: 'var(--text3)' }}>
+        {label}
+      </p>
+      <p
+        className="font-['Syne',sans-serif] text-lg font-bold"
+        style={{ color }}
+      >
         {displayValue}
       </p>
       {metric === 'revenue' && (
-        <p className="text-[11px] text-[#8b90a0] mt-0.5">
+        <p className="text-[11px] mt-0.5" style={{ color: 'var(--text2)' }}>
           {point.orders.toLocaleString()} orders
         </p>
       )}
       {point.isAnomaly && (
-        <p className="text-[11px] text-amber-400 mt-2 pt-2 border-t border-[#2a2f3d]">
+        <p className="text-[11px] mt-2 pt-2 text-amber-400" style={{ borderTop: '1px solid var(--border)' }}>
           ⚠ Anomaly detected
         </p>
       )}
+      <p className="text-[10px] mt-2" style={{ color: 'var(--text3)' }}>
+        Click to drill down
+      </p>
     </div>
   );
 }
 
-export function RevenueChart({ data, activeMetric, chartType }: RevenueChartProps) {
+export function RevenueChart({ data, activeMetric, chartType, onBarClick }: RevenueChartProps) {
   const color = METRIC_COLOR[activeMetric];
 
   const yFormatter = useMemo(
@@ -66,9 +81,21 @@ export function RevenueChart({ data, activeMetric, chartType }: RevenueChartProp
     [activeMetric]
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function handleClick(chartData: any) {
+    if (chartData?.activePayload?.[0]?.payload && onBarClick) {
+      onBarClick(chartData.activePayload[0].payload as DailyDataPoint);
+    }
+  }
+
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <ComposedChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+      <ComposedChart
+        data={data}
+        margin={{ top: 4, right: 4, left: 0, bottom: 0 }}
+        onClick={handleClick}
+        style={{ cursor: onBarClick ? 'pointer' : 'default' }}
+      >
         <CartesianGrid stroke="#2a2f3d" strokeWidth={0.5} vertical={false} />
         <XAxis
           dataKey="date"

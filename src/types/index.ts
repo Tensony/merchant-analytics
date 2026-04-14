@@ -87,4 +87,10 @@ export interface Campaign {
   revenue: number;
   startDate: string;
   endDate: string;
+}
+export interface DrillDownData {
+  date:    string;
+  revenue: number;
+  orders:  number;
+  aov:     number;
 }// Type definitions 
