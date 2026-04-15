@@ -87,4 +87,12 @@ export interface Campaign {
   revenue: number;
   startDate: string;
   endDate: string;
+}
+export interface AppNotification {
+  id:        string;
+  type:      'anomaly' | 'order' | 'campaign' | 'system';
+  title:     string;
+  message:   string;
+  timestamp: string;
+  read:      boolean;
 }// Type definitions 
