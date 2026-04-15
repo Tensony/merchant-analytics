@@ -91,8 +91,21 @@ export interface Campaign {
 export interface AppNotification {
   id:        string;
   type:      'anomaly' | 'order' | 'campaign' | 'system';
+  read:      boolean;
   title:     string;
   message:   string;
   timestamp: string;
-  read:      boolean;
+}
+export interface AuthUser {
+  id:        string;
+  name:      string;
+  email:     string;
+  plan:      'starter' | 'growth' | 'pro';
+  avatar:    string;
+}
+
+export interface AuthState {
+  user:       AuthUser | null;
+  isAuth:     boolean;
+  isLoading:  boolean;
 }// Type definitions 
