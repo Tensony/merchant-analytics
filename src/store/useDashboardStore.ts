@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { MetricKey, TimeRange, ChartType, Product, Campaign } from '../types';
+import type { MetricKey, TimeRange, ChartType, Product, Campaign, AppNotification } from '../types';
 import { PRODUCTS, CAMPAIGNS } from '../data/mockData';
 
 interface UserProfile {
@@ -32,6 +32,13 @@ interface DashboardState {
   profile:       UserProfile;
   notifications: NotificationSettings;
 
+  // Notifications
+  notifications_list:    AppNotification[];
+  unreadCount:           number;
+  addNotification:       (n: Omit<AppNotification, 'id' | 'timestamp' | 'read'>) => void;
+  markAllRead:           () => void;
+  clearNotifications:    () => void;
+
   // Actions — preferences
   setActiveMetric: (m: MetricKey)    => void;
   setTimeRange:    (r: TimeRange)    => void;
@@ -60,7 +67,7 @@ export const useDashboardStore = create<DashboardState>()(
       campaigns: CAMPAIGNS,
 
       profile: {
-        displayName: 'Tenson M.',
+        displayName: 'Tenson C.',
         email:       'tenson@merchant.io',
         timezone:    'Africa/Lusaka (CAT)',
         currency:    'USD ($)',
@@ -72,6 +79,35 @@ export const useDashboardStore = create<DashboardState>()(
         newOrderAlerts:      false,
         campaignPerformance: true,
       },
+
+      // Notifications state
+      notifications_list: [
+        {
+          id: '1', type: 'anomaly' as const, read: false,
+          title: 'Revenue spike detected',
+          message: 'Mar 15 revenue was 187% above 7-day average.',
+          timestamp: '2 hours ago',
+        },
+        {
+          id: '2', type: 'order' as const, read: false,
+          title: 'Large order received',
+          message: 'Chioma Eze placed a $740 order.',
+          timestamp: '4 hours ago',
+        },
+        {
+          id: '3', type: 'campaign' as const, read: true,
+          title: 'Campaign completed',
+          message: 'Spring Sale Email Blast ended with 4.2x ROAS.',
+          timestamp: '1 day ago',
+        },
+        {
+          id: '4', type: 'system' as const, read: true,
+          title: 'Weekly digest ready',
+          message: 'Your week of Mar 25–30 summary is available.',
+          timestamp: '2 days ago',
+        },
+      ],
+      unreadCount: 2,
 
       // Preference actions
       setActiveMetric: (activeMetric) => set({ activeMetric }),
@@ -94,6 +130,30 @@ export const useDashboardStore = create<DashboardState>()(
 
       updateNotifications: (partial) =>
         set((s) => ({ notifications: { ...s.notifications, ...partial } })),
+
+      // Notification actions
+      addNotification: (n) =>
+        set((s) => {
+          const newNotif: AppNotification = {
+            ...n,
+            id:        Date.now().toString(),
+            timestamp: 'just now',
+            read:      false,
+          };
+          return {
+            notifications_list: [newNotif, ...s.notifications_list],
+            unreadCount:        s.unreadCount + 1,
+          };
+        }),
+
+      markAllRead: () =>
+        set((s) => ({
+          notifications_list: s.notifications_list.map((n) => ({ ...n, read: true })),
+          unreadCount:        0,
+        })),
+
+      clearNotifications: () =>
+        set({ notifications_list: [], unreadCount: 0 }),
     }),
     {
       name: 'merchant-dashboard',

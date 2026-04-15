@@ -1,26 +1,31 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
 import { FormField, Input } from '../components/ui/FormField';
 
 export function LoginPage() {
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const { login, isLoading } = useAuthStore();
+
+  const from = (location.state as { from?: string })?.from ?? '/app';
+
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
-  const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
+  const [showPass, setShowPass] = useState(false);
 
-  function handleLogin() {
-    if (!email || !password) {
-      setError('Please enter your email and password.');
-      return;
-    }
-    setLoading(true);
+  async function handleLogin() {
+    if (!email.trim()) { setError('Email is required.');    return; }
+    if (!password)     { setError('Password is required.'); return; }
     setError('');
-    // Simulate auth — replace with real API call later
-    setTimeout(() => {
-      setLoading(false);
-      navigate('/app');
-    }, 1000);
+
+    const result = await login(email.trim(), password);
+    if (result.success) {
+      navigate(from, { replace: true });
+    } else {
+      setError(result.error ?? 'Login failed. Please try again.');
+    }
   }
 
   return (
@@ -70,64 +75,80 @@ export function LoginPage() {
           </FormField>
 
           <FormField label="Password">
-            <Input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-            />
+            <div className="relative">
+              <Input
+                type={showPass ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs transition-colors"
+                style={{ color: 'var(--text3)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text3)'; }}
+              >
+                {showPass ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </FormField>
 
           <div className="flex items-center justify-between">
             <label
-              className="flex items-center gap-2 text-xs cursor-pointer"
+              className="flex items-center gap-2 text-xs cursor-pointer select-none"
               style={{ color: 'var(--text2)' }}
             >
               <input type="checkbox" className="rounded" />
               Remember me
             </label>
-            <button
-              className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
-            >
+            <button className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
               Forgot password?
             </button>
           </div>
 
           <button
             onClick={handleLogin}
-            disabled={loading}
-            className="w-full py-2.5 rounded-lg text-sm font-medium transition-colors"
+            disabled={isLoading}
+            className="w-full py-2.5 rounded-lg text-sm font-medium transition-all"
             style={{
-              backgroundColor: loading ? 'var(--surface3)' : '#22d98a',
-              color: loading ? 'var(--text3)' : '#0d0f12',
-              cursor: loading ? 'not-allowed' : 'pointer',
+              backgroundColor: isLoading ? 'var(--surface3)' : '#22d98a',
+              color:           isLoading ? 'var(--text3)'    : '#0d0f12',
+              cursor:          isLoading ? 'not-allowed'      : 'pointer',
             }}
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </button>
 
-          <p
-            className="text-center text-xs"
-            style={{ color: 'var(--text3)' }}
-          >
+          <p className="text-center text-xs" style={{ color: 'var(--text3)' }}>
             Don't have an account?{' '}
             <Link
-              to="/login"
-              className="text-emerald-400 hover:text-emerald-300 transition-colors"
+              to="/register"
+              className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium"
             >
-              Start for free
+              Create one free
             </Link>
           </p>
         </div>
 
         {/* Demo hint */}
-        <p
-          className="text-center text-xs mt-4"
-          style={{ color: 'var(--text3)' }}
+        <div
+          className="mt-4 rounded-lg px-4 py-3 text-xs"
+          style={{
+            backgroundColor: 'var(--surface)',
+            border: '1px solid var(--border)',
+            color: 'var(--text3)',
+          }}
         >
-          Demo: enter any email + password to access the dashboard
-        </p>
+          <p className="font-mono text-[10px] tracking-widest uppercase mb-1" style={{ color: 'var(--text3)' }}>
+            Demo credentials
+          </p>
+          <p>Email: <span style={{ color: 'var(--text2)' }}>tenson@merchant.io</span></p>
+          <p>Password: <span style={{ color: 'var(--text2)' }}>demo1234</span></p>
+          <p className="mt-1" style={{ color: 'var(--text3)' }}>Or use any email + password</p>
+        </div>
       </div>
     </div>
   );

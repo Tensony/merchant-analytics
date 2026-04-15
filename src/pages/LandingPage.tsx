@@ -57,7 +57,7 @@ const PRICING_TIERS = [
       'Email support',
     ],
     cta:     'Get started free',
-    ctaPath: '/login',
+    ctaPath: '/register',
   },
   {
     name:    'Growth',
@@ -74,7 +74,7 @@ const PRICING_TIERS = [
       'Priority support',
     ],
     cta:     'Start free trial',
-    ctaPath: '/login',
+    ctaPath: '/pricing',
   },
   {
     name:    'Pro',
@@ -92,7 +92,7 @@ const PRICING_TIERS = [
       'Dedicated support',
     ],
     cta:     'Start free trial',
-    ctaPath: '/login',
+    ctaPath: '/pricing',
   },
 ];
 
@@ -188,7 +188,7 @@ function Navbar() {
           Sign in
         </Link>
         <Link
-          to="/login"
+          to="/register"
           className="text-sm px-4 py-1.5 rounded-lg font-medium transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
         >
           Get started free
@@ -243,7 +243,7 @@ export function LandingPage() {
         {/* CTA buttons */}
         <div className="flex items-center gap-3 flex-wrap justify-center">
           <Link
-            to="/login"
+            to="/register"
             className="px-6 py-3 rounded-xl text-sm font-semibold transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
           >
             Start for free — no credit card
@@ -657,7 +657,7 @@ export function LandingPage() {
           </p>
           <div className="flex items-center gap-3">
             <Link
-              to="/login"
+              to="/register"
               className="px-6 py-3 rounded-xl text-sm font-semibold transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
             >
               Get started free

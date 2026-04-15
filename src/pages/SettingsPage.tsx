@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Panel, PanelHeader } from '../components/ui/Panel';
 import { FormField, Input, Select } from '../components/ui/FormField';
 import { useDashboardStore } from '../store/useDashboardStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { triggerAnomalyToast } from '../components/ui/AnomalyToast';
 
 const TIMEZONE_OPTIONS = [
@@ -45,6 +47,7 @@ const NOTIFICATION_ITEMS = [
 export function SettingsPage() {
   const { profile, notifications, updateProfile, updateNotifications } =
     useDashboardStore();
+  const { user } = useAuthStore();
 
   const [localProfile, setLocalProfile] = useState({ ...profile });
   const [isDirty,      setIsDirty]      = useState(false);
@@ -156,6 +159,36 @@ export function SettingsPage() {
               {isDirty ? 'Save changes' : 'No changes'}
             </button>
           </div>
+        </div>
+      </Panel>
+
+      {/* Plan */}
+      <Panel>
+        <PanelHeader title="Your plan" />
+        <div className="p-[18px] flex items-center justify-between">
+          <div>
+            <p
+              className="text-sm font-medium capitalize"
+              style={{ color: 'var(--text)' }}
+            >
+              {user?.plan ?? 'Starter'} plan
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text3)' }}>
+              {user?.plan === 'starter'
+                ? 'Upgrade to unlock more stores, longer history and alerts'
+                : user?.plan === 'growth'
+                ? 'Upgrade to Pro for unlimited stores and API access'
+                : 'You are on the highest plan'}
+            </p>
+          </div>
+          {user?.plan !== 'pro' && (
+            <Link
+              to="/pricing"
+              className="text-xs px-4 py-2 rounded-lg font-medium transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
+            >
+              Upgrade plan
+            </Link>
+          )}
         </div>
       </Panel>
 

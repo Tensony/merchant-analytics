@@ -88,9 +88,24 @@ export interface Campaign {
   startDate: string;
   endDate: string;
 }
-export interface DrillDownData {
-  date:    string;
-  revenue: number;
-  orders:  number;
-  aov:     number;
+export interface AppNotification {
+  id:        string;
+  type:      'anomaly' | 'order' | 'campaign' | 'system';
+  read:      boolean;
+  title:     string;
+  message:   string;
+  timestamp: string;
+}
+export interface AuthUser {
+  id:        string;
+  name:      string;
+  email:     string;
+  plan:      'starter' | 'growth' | 'pro';
+  avatar:    string;
+}
+
+export interface AuthState {
+  user:       AuthUser | null;
+  isAuth:     boolean;
+  isLoading:  boolean;
 }// Type definitions 
