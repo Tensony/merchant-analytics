@@ -1,5 +1,9 @@
 import { useMemo, useEffect } from 'react';
 import { useState } from 'react';
+import { useRealtimeChart }     from '../hooks/useRealtimeChart';
+import { useChartAnnotations }  from '../hooks/useChartAnnotations';
+import { KpiDrillDown }         from '../components/ui/KpiDrillDown';
+import { AnnotationPanel }      from '../components/ui/AnnotationPanel';
 import { useRealtimeOrders } from '../hooks/useRealtimeOrders';
 import { LiveOrderFeed } from '../components/ui/LiveOrderFeed';
 import { DrillDownModal } from '../components/ui/DrillDownModal';
@@ -49,6 +53,13 @@ const SPARK_COLORS: Record<MetricKey, string> = {
   churn:   '#ff5757',
 };
 
+const DRILL_COLORS: Record<MetricKey, string> = {
+  revenue: '#22d98a',
+  orders:  '#4d9cf8',
+  aov:     '#a78bfa',
+  churn:   '#ff5757',
+};
+
 const CHART_TITLE: Record<MetricKey, string> = {
   revenue: 'Revenue over time',
   orders:  'Order volume over time',
@@ -65,6 +76,13 @@ export function OverviewPage() {
   useUrlState();
   const { orders: liveOrders_, connected, orderCount, clearOrders } = useRealtimeOrders();
   const [drillPoint, setDrillPoint] = useState<DrillPoint | null>(null);
+  
+  // New state for enhanced features
+  const [kpiDrillKey,     setKpiDrillKey]     = useState<MetricKey | null>(null);
+  const [showComparison,  setShowComparison]  = useState(false);
+  const [liveChartEnabled, setLiveChartEnabled] = useState(true);
+
+  const { annotations, addAnnotation, removeAnnotation, clearAll } = useChartAnnotations();
 
   // ── 2. Global store ──────────────────────────────────────────────────────
   const {
@@ -138,6 +156,13 @@ export function OverviewPage() {
   const hasAnomaly =
     activeMetric === 'revenue' &&
     filteredData.some((d: DailyDataPoint) => d.isAnomaly);
+
+  // Real-time chart hook
+  const { liveData, isAnimating, lastUpdate } = useRealtimeChart(
+    filteredData,
+    liveChartEnabled,
+    4000
+  );
 
   // ── 7. Side effects ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -276,7 +301,10 @@ export function OverviewPage() {
             sparkData={sparkData[kpi.key]}
             sparkColor={SPARK_COLORS[kpi.key]}
             isActive={activeMetric === kpi.key}
-            onClick={setActiveMetric}
+            onClick={(key) => {
+              setActiveMetric(key);
+              setKpiDrillKey(key);
+            }}
           />
         ))}
       </div>
@@ -285,23 +313,64 @@ export function OverviewPage() {
       <div className="grid grid-cols-[1fr_300px] gap-3">
         <Panel>
           <PanelHeader title={CHART_TITLE[activeMetric]}>
-            <div
-              className="flex gap-0.5 p-0.5 rounded-md"
-              style={{ backgroundColor: 'var(--surface2)' }}
-            >
-              {(['bar', 'line'] as const).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setChartType(t)}
-                  className="font-mono text-[11px] px-2.5 py-1 rounded transition-all duration-150 capitalize"
-                  style={{
-                    backgroundColor: chartType === t ? 'var(--surface3)' : 'transparent',
-                    color:           chartType === t ? 'var(--text)'  : 'var(--text3)',
-                  }}
-                >
-                  {t}
-                </button>
-              ))}
+            <div className="flex items-center gap-2">
+              {/* Comparison toggle */}
+              <button
+                onClick={() => setShowComparison((v) => !v)}
+                className="font-mono text-[11px] px-2.5 py-1 rounded transition-all"
+                style={{
+                  backgroundColor: showComparison ? '#4d9cf822' : 'transparent',
+                  border: showComparison ? '1px solid #4d9cf855' : '1px solid var(--border)',
+                  color: showComparison ? '#4d9cf8' : 'var(--text3)',
+                }}
+              >
+                vs prev
+              </button>
+
+              {/* Live toggle */}
+              <button
+                onClick={() => setLiveChartEnabled((v) => !v)}
+                className="font-mono text-[11px] px-2.5 py-1 rounded transition-all flex items-center gap-1.5"
+                style={{
+                  backgroundColor: liveChartEnabled ? '#22d98a22' : 'transparent',
+                  border: liveChartEnabled ? '1px solid #22d98a55' : '1px solid var(--border)',
+                  color: liveChartEnabled ? '#22d98a' : 'var(--text3)',
+                }}
+              >
+                {liveChartEnabled && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                )}
+                Live
+              </button>
+
+              {/* Annotations */}
+              <AnnotationPanel
+                annotations={annotations}
+                availableDates={filteredData.map((d) => d.date)}
+                onAdd={addAnnotation}
+                onRemove={removeAnnotation}
+                onClearAll={clearAll}
+              />
+
+              {/* Bar/Line toggle */}
+              <div
+                className="flex gap-0.5 p-0.5 rounded-md"
+                style={{ backgroundColor: 'var(--surface2)' }}
+              >
+                {(['bar', 'line'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setChartType(t)}
+                    className="font-mono text-[11px] px-2.5 py-1 rounded transition-all duration-150 capitalize"
+                    style={{
+                      backgroundColor: chartType === t ? 'var(--surface3)' : 'transparent',
+                      color:           chartType === t ? 'var(--text)'  : 'var(--text3)',
+                    }}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
             </div>
           </PanelHeader>
 
@@ -315,9 +384,14 @@ export function OverviewPage() {
 
           <div className="p-4">
             <RevenueChart
-              data={filteredData}
+              data={liveData}
+              previousData={showComparison ? previousData : []}
               activeMetric={activeMetric}
               chartType={chartType}
+              annotations={annotations}
+              showComparison={showComparison}
+              isLive={liveChartEnabled}
+              lastUpdate={lastUpdate}
               onBarClick={(point) => setDrillPoint(point)}
             />
           </div>
@@ -404,11 +478,22 @@ export function OverviewPage() {
         </Panel>
       </div>
 
-      {/* ── Drill-down modal ─────────────────────────────────────────────── */}
+      {/* ── Drill-down modals ─────────────────────────────────────────────── */}
       {drillPoint && (
         <DrillDownModal
           point={drillPoint}
           onClose={() => setDrillPoint(null)}
+        />
+      )}
+
+      {kpiDrillKey && (
+        <KpiDrillDown
+          metricKey={kpiDrillKey}
+          label={kpis.find((k) => k.key === kpiDrillKey)?.label ?? kpiDrillKey}
+          data={filteredData}
+          previousData={previousData}
+          color={DRILL_COLORS[kpiDrillKey]}
+          onClose={() => setKpiDrillKey(null)}
         />
       )}
     </div>
