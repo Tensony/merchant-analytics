@@ -110,10 +110,10 @@ export function CampaignsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1
             className="font-['Syne',sans-serif] text-xl font-bold tracking-tight"
@@ -127,14 +127,14 @@ export function CampaignsPage() {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 font-medium text-xs px-4 py-2 rounded-lg transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
+          className="flex items-center justify-center gap-2 font-medium text-xs px-4 py-2 rounded-lg transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
         >
           + New campaign
         </button>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: 'Total Revenue',  value: '$' + totalRevenue.toLocaleString(), color: '#22d98a' },
           { label: 'Total Spend',    value: '$' + totalSpend.toLocaleString(),   color: '#ff5757' },
@@ -156,7 +156,7 @@ export function CampaignsPage() {
               {card.label}
             </p>
             <p
-              className="font-['Syne',sans-serif] text-2xl font-bold tracking-tight"
+              className="font-['Syne',sans-serif] text-xl md:text-2xl font-bold tracking-tight"
               style={{ color: card.color }}
             >
               {card.value}
@@ -175,10 +175,10 @@ export function CampaignsPage() {
           return (
             <Panel key={camp.id}>
               <div className="p-[18px]">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <span
-                      className="font-mono text-[10px] px-2 py-0.5 rounded font-medium"
+                      className="font-mono text-[10px] px-2 py-0.5 rounded font-medium w-fit"
                       style={{
                         background: ch.color + '22',
                         color: ch.color,
@@ -201,13 +201,13 @@ export function CampaignsPage() {
                       </p>
                     </div>
                   </div>
-                  <span className={clsx('font-mono text-[10px] px-2 py-0.5 rounded', st.className)}>
+                  <span className={clsx('font-mono text-[10px] px-2 py-0.5 rounded w-fit', st.className)}>
                     {st.label}
                   </span>
                 </div>
 
                 {/* Metrics */}
-                <div className="grid grid-cols-6 gap-4 mb-4">
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4 mb-4">
                   {[
                     { label: 'Impressions', value: camp.impressions > 0 ? (camp.impressions / 1000).toFixed(0) + 'k' : '—' },
                     { label: 'Clicks',      value: camp.clicks > 0 ? camp.clicks.toLocaleString() : '—'                    },
@@ -224,7 +224,7 @@ export function CampaignsPage() {
                         {m.label}
                       </p>
                       <p
-                        className="font-mono text-sm font-medium"
+                        className="font-mono text-xs md:text-sm font-medium"
                         style={{ color: 'var(--text)' }}
                       >
                         {m.value}
@@ -290,7 +290,7 @@ export function CampaignsPage() {
               />
             </FormField>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField label="Channel" required>
                 <Select
                   value={form.channel}
@@ -321,7 +321,7 @@ export function CampaignsPage() {
               />
             </FormField>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField label="Start date" required error={errors.startDate}>
                 <Input
                   type="date"
@@ -340,10 +340,10 @@ export function CampaignsPage() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 mt-2">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 mt-2">
             <button
               onClick={handleClose}
-              className="text-xs px-4 py-2 rounded-lg transition-all"
+              className="text-xs px-4 py-2 rounded-lg transition-all w-full sm:w-auto"
               style={{
                 border: '1px solid var(--border)',
                 color: 'var(--text2)',
@@ -359,7 +359,7 @@ export function CampaignsPage() {
             </button>
             <button
               onClick={handleSubmit}
-              className="text-xs px-4 py-2 rounded-lg font-medium transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
+              className="text-xs px-4 py-2 rounded-lg font-medium transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] w-full sm:w-auto"
             >
               Create campaign
             </button>

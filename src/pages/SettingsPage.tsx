@@ -68,7 +68,7 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
 
       {/* Header */}
       <div>
@@ -89,7 +89,7 @@ export function SettingsPage() {
         <div className="p-[18px] flex flex-col gap-4">
 
           {/* Avatar */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-emerald-950 flex items-center justify-center text-emerald-400 font-mono text-lg font-medium flex-shrink-0">
               {localProfile.displayName.slice(0, 2).toUpperCase()}
             </div>
@@ -110,7 +110,7 @@ export function SettingsPage() {
           </div>
 
           {/* Form fields */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField label="Display name">
               <Input
                 type="text"
@@ -149,7 +149,7 @@ export function SettingsPage() {
             <button
               onClick={handleSave}
               disabled={!isDirty}
-              className="text-xs px-4 py-2 rounded-lg font-medium transition-colors"
+              className="text-xs px-4 py-2 rounded-lg font-medium transition-colors w-full sm:w-auto"
               style={{
                 backgroundColor: isDirty ? '#22d98a' : 'var(--surface3)',
                 color:           isDirty ? '#0d0f12' : 'var(--text3)',
@@ -165,7 +165,7 @@ export function SettingsPage() {
       {/* Plan */}
       <Panel>
         <PanelHeader title="Your plan" />
-        <div className="p-[18px] flex items-center justify-between">
+        <div className="p-[18px] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p
               className="text-sm font-medium capitalize"
@@ -184,7 +184,7 @@ export function SettingsPage() {
           {user?.plan !== 'pro' && (
             <Link
               to="/pricing"
-              className="text-xs px-4 py-2 rounded-lg font-medium transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
+              className="text-xs px-4 py-2 rounded-lg font-medium transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] text-center w-full sm:w-auto"
             >
               Upgrade plan
             </Link>
@@ -199,7 +199,7 @@ export function SettingsPage() {
           {NOTIFICATION_ITEMS.map((item, i) => (
             <div
               key={item.key}
-              className="flex items-center justify-between py-3"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3"
               style={{
                 borderBottom:
                   i < NOTIFICATION_ITEMS.length - 1
@@ -207,7 +207,7 @@ export function SettingsPage() {
                     : 'none',
               }}
             >
-              <div>
+              <div className="flex-1">
                 <p
                   className="text-xs font-medium"
                   style={{ color: 'var(--text)' }}
@@ -225,7 +225,7 @@ export function SettingsPage() {
               {/* Toggle switch */}
               <div
                 onClick={() => handleNotificationToggle(item.key)}
-                className="flex items-center cursor-pointer flex-shrink-0 rounded-full transition-colors duration-200"
+                className="flex items-center cursor-pointer flex-shrink-0 rounded-full transition-colors duration-200 self-end sm:self-center"
                 style={{
                   width:           '36px',
                   height:          '20px',
@@ -254,7 +254,7 @@ export function SettingsPage() {
       {/* Danger zone */}
       <Panel>
         <PanelHeader title="Danger zone" />
-        <div className="p-[18px] flex items-center justify-between">
+        <div className="p-[18px] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p
               className="text-xs font-medium"
@@ -274,7 +274,7 @@ export function SettingsPage() {
               localStorage.removeItem('merchant-dashboard');
               window.location.reload();
             }}
-            className="text-xs px-4 py-2 rounded-lg font-medium transition-all"
+            className="text-xs px-4 py-2 rounded-lg font-medium transition-all w-full sm:w-auto"
             style={{
               border: '1px solid var(--border)',
               color: '#ff5757',

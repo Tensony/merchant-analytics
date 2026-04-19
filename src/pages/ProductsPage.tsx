@@ -89,10 +89,10 @@ export function ProductsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1
             className="font-['Syne',sans-serif] text-xl font-bold tracking-tight"
@@ -106,14 +106,14 @@ export function ProductsPage() {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 font-medium text-xs px-4 py-2 rounded-lg transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
+          className="flex items-center justify-center gap-2 font-medium text-xs px-4 py-2 rounded-lg transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
         >
           + Add product
         </button>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           { label: 'Total Products', value: products.length.toString(),         color: '#4d9cf8' },
           { label: 'Total Sales',    value: totalSales.toLocaleString(),         color: '#22d98a' },
@@ -146,15 +146,15 @@ export function ProductsPage() {
       {/* Table */}
       <Panel>
         <PanelHeader title="All products">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search..."
-              style={{ width: '160px' }}
+              style={{ width: '140px' }}
             />
-            <div className="flex gap-1">
+            <div className="flex gap-1 flex-wrap">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
@@ -175,108 +175,110 @@ export function ProductsPage() {
           </div>
         </PanelHeader>
 
-        <table className="w-full text-xs">
-          <thead>
-            <tr>
-              {[
-                { label: 'Product',  key: null       },
-                { label: 'Category', key: null       },
-                { label: 'Sales',    key: 'sales'    },
-                { label: 'Revenue',  key: 'revenue'  },
-                { label: 'Trend',    key: 'delta'    },
-              ].map((col) => (
-                <th
-                  key={col.label}
-                  onClick={() =>
-                    col.key &&
-                    toggleSort(col.key as 'sales' | 'revenue' | 'delta')
-                  }
-                  className={clsx(
-                    'font-mono text-[10px] tracking-widest uppercase px-[18px] py-3 text-left',
-                    col.key && 'cursor-pointer select-none transition-colors'
-                  )}
-                  style={{ color: 'var(--text3)' }}
-                >
-                  {col.label}
-                  {col.key && sortKey === col.key && (
-                    <span className="ml-1">{sortDir === 'desc' ? '↓' : '↑'}</span>
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sortedProducts.length === 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs min-w-[600px]">
+            <thead>
               <tr>
-                <td
-                  colSpan={5}
-                  className="px-[18px] py-8 text-center text-xs"
-                  style={{ color: 'var(--text3)' }}
-                >
-                  No products match your search.
-                </td>
+                {[
+                  { label: 'Product',  key: null       },
+                  { label: 'Category', key: null       },
+                  { label: 'Sales',    key: 'sales'    },
+                  { label: 'Revenue',  key: 'revenue'  },
+                  { label: 'Trend',    key: 'delta'    },
+                ].map((col) => (
+                  <th
+                    key={col.label}
+                    onClick={() =>
+                      col.key &&
+                      toggleSort(col.key as 'sales' | 'revenue' | 'delta')
+                    }
+                    className={clsx(
+                      'font-mono text-[10px] tracking-widest uppercase px-[18px] py-3 text-left',
+                      col.key && 'cursor-pointer select-none transition-colors'
+                    )}
+                    style={{ color: 'var(--text3)' }}
+                  >
+                    {col.label}
+                    {col.key && sortKey === col.key && (
+                      <span className="ml-1">{sortDir === 'desc' ? '↓' : '↑'}</span>
+                    )}
+                  </th>
+                ))}
               </tr>
-            ) : (
-              sortedProducts.map((p) => (
-                <tr
-                  key={p.id}
-                  className="transition-colors cursor-default"
-                  style={{ borderTop: '1px solid var(--border)' }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLTableRowElement).style.backgroundColor =
-                      'var(--surface2)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLTableRowElement).style.backgroundColor =
-                      'transparent';
-                  }}
-                >
-                  <td className="px-[18px] py-3">
-                    <span
-                      className="font-medium block text-xs"
-                      style={{ color: 'var(--text)' }}
-                    >
-                      {p.name}
-                    </span>
-                  </td>
-                  <td className="px-[18px] py-3">
-                    <span
-                      className="font-mono text-[10px] px-2 py-0.5 rounded"
-                      style={{
-                        backgroundColor: 'var(--surface3)',
-                        color: 'var(--text2)',
-                      }}
-                    >
-                      {p.category}
-                    </span>
-                  </td>
+            </thead>
+            <tbody>
+              {sortedProducts.length === 0 ? (
+                <tr>
                   <td
-                    className="px-[18px] py-3 text-xs"
-                    style={{ color: 'var(--text2)' }}
+                    colSpan={5}
+                    className="px-[18px] py-8 text-center text-xs"
+                    style={{ color: 'var(--text3)' }}
                   >
-                    {p.sales.toLocaleString()}
-                  </td>
-                  <td
-                    className="px-[18px] py-3 font-mono text-[11px]"
-                    style={{ color: 'var(--text)' }}
-                  >
-                    ${p.revenue.toLocaleString()}
-                  </td>
-                  <td className="px-[18px] py-3">
-                    <span
-                      className={clsx(
-                        'font-mono text-[11px]',
-                        p.delta >= 0 ? 'text-emerald-400' : 'text-red-400'
-                      )}
-                    >
-                      {p.delta >= 0 ? '▲' : '▼'} {Math.abs(p.delta)}%
-                    </span>
+                    No products match your search.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                sortedProducts.map((p) => (
+                  <tr
+                    key={p.id}
+                    className="transition-colors cursor-default"
+                    style={{ borderTop: '1px solid var(--border)' }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLTableRowElement).style.backgroundColor =
+                        'var(--surface2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLTableRowElement).style.backgroundColor =
+                        'transparent';
+                    }}
+                  >
+                    <td className="px-[18px] py-3">
+                      <span
+                        className="font-medium block text-xs"
+                        style={{ color: 'var(--text)' }}
+                      >
+                        {p.name}
+                      </span>
+                    </td>
+                    <td className="px-[18px] py-3">
+                      <span
+                        className="font-mono text-[10px] px-2 py-0.5 rounded"
+                        style={{
+                          backgroundColor: 'var(--surface3)',
+                          color: 'var(--text2)',
+                        }}
+                      >
+                        {p.category}
+                      </span>
+                    </td>
+                    <td
+                      className="px-[18px] py-3 text-xs"
+                      style={{ color: 'var(--text2)' }}
+                    >
+                      {p.sales.toLocaleString()}
+                    </td>
+                    <td
+                      className="px-[18px] py-3 font-mono text-[11px]"
+                      style={{ color: 'var(--text)' }}
+                    >
+                      ${p.revenue.toLocaleString()}
+                    </td>
+                    <td className="px-[18px] py-3">
+                      <span
+                        className={clsx(
+                          'font-mono text-[11px]',
+                          p.delta >= 0 ? 'text-emerald-400' : 'text-red-400'
+                        )}
+                      >
+                        {p.delta >= 0 ? '▲' : '▼'} {Math.abs(p.delta)}%
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </Panel>
 
       {/* Add Product Modal */}
@@ -300,7 +302,7 @@ export function ProductsPage() {
               />
             </FormField>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField label="Sales (units)" required error={errors.sales}>
                 <Input
                   type="number"

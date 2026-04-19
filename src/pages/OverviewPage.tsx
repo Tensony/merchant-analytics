@@ -192,7 +192,7 @@ export function OverviewPage() {
 
   // ── 9. Render ─────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col gap-3 p-6">
+    <div className="flex flex-col gap-3 p-4 md:p-6">
 
       {/* Loading indicator */}
       {metricsLoading && (
@@ -209,7 +209,7 @@ export function OverviewPage() {
       )}
 
       {/* ── Page header ─────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-1 gap-3">
         <div>
           <h1
             className="font-['Syne',sans-serif] text-xl font-bold tracking-tight"
@@ -222,7 +222,7 @@ export function OverviewPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Export CSV */}
           <button
             onClick={handleExport}
@@ -271,7 +271,7 @@ export function OverviewPage() {
               <button
                 key={r}
                 onClick={() => setTimeRange(r)}
-                className="font-mono text-[11px] px-3 py-1.5 rounded-md transition-all duration-150"
+                className="font-mono text-[11px] px-2 md:px-3 py-1.5 rounded-md transition-all duration-150"
                 style={{
                   backgroundColor: timeRange === r ? 'var(--surface3)' : 'transparent',
                   color:           timeRange === r ? 'var(--text)'  : 'var(--text3)',
@@ -288,7 +288,7 @@ export function OverviewPage() {
       </div>
 
       {/* ── KPI cards ───────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {kpis.map((kpi) => (
           <KpiCard
             key={kpi.key}
@@ -310,10 +310,10 @@ export function OverviewPage() {
       </div>
 
       {/* ── Main chart + Geo ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-[1fr_300px] gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-3">
         <Panel>
           <PanelHeader title={CHART_TITLE[activeMetric]}>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {/* Comparison toggle */}
               <button
                 onClick={() => setShowComparison((v) => !v)}
@@ -361,7 +361,7 @@ export function OverviewPage() {
                   <button
                     key={t}
                     onClick={() => setChartType(t)}
-                    className="font-mono text-[11px] px-2.5 py-1 rounded transition-all duration-150 capitalize"
+                    className="font-mono text-[11px] px-2 md:px-2.5 py-1 rounded transition-all duration-150 capitalize"
                     style={{
                       backgroundColor: chartType === t ? 'var(--surface3)' : 'transparent',
                       color:           chartType === t ? 'var(--text)'  : 'var(--text3)',
@@ -404,7 +404,7 @@ export function OverviewPage() {
       </div>
 
       {/* ── Products + Funnel ────────────────────────────────────────────── */}
-      <div className="grid grid-cols-[1fr_320px] gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-3">
         <Panel>
           <PanelHeader title="Top products" />
           <ProductsTable
@@ -422,7 +422,7 @@ export function OverviewPage() {
       </div>
 
       {/* ── Orders + Live Feed + Channel ────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <Panel>
           <PanelHeader title="Recent orders">
             <div className="flex items-center gap-2">

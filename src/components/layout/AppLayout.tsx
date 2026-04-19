@@ -16,7 +16,7 @@ export function AppLayout() {
       >
         <AnomalyToast />
         <Sidebar />
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto md:ml-0 mt-[52px] md:mt-0">
           <Outlet />
         </div>
       </div>

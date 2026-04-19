@@ -175,3 +175,40 @@ html {
   transform-style: preserve-3d;
   perspective: 1000px;
 }
+/* Mobile utilities */
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: flex !important; }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent horizontal overflow */
+body {
+  overflow-x: hidden;
+}
+
+/* Better touch targets on mobile */
+@media (max-width: 768px) {
+  button, a {
+    min-height: 36px;
+  }
+}
+
+/* Table scroll shadow hint */
+.table-scroll-wrap {
+  position: relative;
+}
+.table-scroll-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 24px;
+  background: linear-gradient(to right, transparent, var(--surface));
+  pointer-events: none;
+}
