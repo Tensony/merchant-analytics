@@ -13,6 +13,10 @@ interface AuthStore {
   user:      AuthUser | null;
   isAuth:    boolean;
   isLoading: boolean;
+  
+  // Onboarding
+  hasCompletedOnboarding: boolean;
+  completeOnboarding:     () => void;
 
   login:    (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
@@ -38,6 +42,10 @@ export const useAuthStore = create<AuthStore>()(
       user:      null,
       isAuth:    false,
       isLoading: false,
+      
+      // Onboarding state
+      hasCompletedOnboarding: false,
+      completeOnboarding: () => set({ hasCompletedOnboarding: true }),
 
       login: async (email, password) => {
         set({ isLoading: true });
@@ -88,12 +96,12 @@ export const useAuthStore = create<AuthStore>()(
           avatar: name.slice(0, 2).toUpperCase(),
         };
 
-        set({ user: newUser, isAuth: true, isLoading: false });
+        set({ user: newUser, isAuth: true, isLoading: false, hasCompletedOnboarding: false });
         return { success: true };
       },
 
       logout: () => {
-        set({ user: null, isAuth: false });
+        set({ user: null, isAuth: false, hasCompletedOnboarding: false });
       },
 
       upgradePlan: (plan) => {
@@ -105,7 +113,11 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'merchant-auth',
-      partialize: (state) => ({ user: state.user, isAuth: state.isAuth }),
+      partialize: (state) => ({ 
+        user: state.user, 
+        isAuth: state.isAuth, 
+        hasCompletedOnboarding: state.hasCompletedOnboarding 
+      }),
     }
   )
 );

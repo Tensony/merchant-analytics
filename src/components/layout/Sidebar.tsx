@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { clsx } from 'clsx';
+import { StoreSwitcher } from '../ui/StoreSwitcher';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { NotificationsPanel } from '../ui/NotificationsPanel';
 import { GlobalSearch } from '../ui/GlobalSearch';
+import { KeyboardShortcutsModal } from '../ui/KeyboardShortcutsModal';
 import { useDashboardStore } from '../../store/useDashboardStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
 interface NavItem {
   label: string;
@@ -21,16 +24,26 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const BOTTOM_ITEMS: NavItem[] = [
-  { label: 'Settings', path: '/app/settings', icon: '◎' },
+  { label: 'Settings',     path: '/app/settings',     icon: '◎' },
+  { label: 'Email digest', path: '/app/email-digest', icon: '✉' },
 ];
 
 export function Sidebar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
 
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
-  const { unreadCount, profile } = useDashboardStore();
+  const { unreadCount, profile, toggleTheme } = useDashboardStore();
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onSearch:    () => setShowSearch(true),
+    onShortcuts: () => setShowShortcuts(true),
+    onTheme:     toggleTheme,
+    onExport:    () => {},
+  });
 
   const initials = profile.displayName
     .split(' ')
@@ -47,31 +60,36 @@ export function Sidebar() {
         borderRight: '1px solid var(--border)',
       }}
     >
-     {/* Logo */}
-<div className="px-5 py-5" style={{ borderBottom: '1px solid var(--border)' }}>
-  <Link to="/">
-    <span
-      className="font-['Syne',sans-serif] text-[15px] font-bold tracking-tight"
-      style={{ color: 'var(--text)' }}
-    >
-      merchant<span className="text-emerald-400">.</span>analytics
-    </span>
-  </Link>
-  <div className="mt-1.5 flex items-center gap-2">
-    <span className="bg-emerald-950 text-emerald-400 font-mono text-[9px] font-medium px-1.5 py-0.5 rounded tracking-widest">
-      LIVE
-    </span>
-    <Link
-      to="/"
-      className="font-mono text-[9px] transition-colors"
-      style={{ color: 'var(--text3)' }}
-      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text3)'; }}
-    >
-      ← Back to site
-    </Link>
-  </div>
-</div>
+      {/* Keyboard Shortcuts Modal */}
+      {showShortcuts && (
+        <KeyboardShortcutsModal onClose={() => setShowShortcuts(false)} />
+      )}
+
+      {/* Logo */}
+      <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--border)' }}>
+        <Link to="/">
+          <span
+            className="font-['Syne',sans-serif] text-[15px] font-bold tracking-tight"
+            style={{ color: 'var(--text)' }}
+          >
+            merchant<span className="text-emerald-400">.</span>analytics
+          </span>
+        </Link>
+        <div className="mt-1.5 flex items-center gap-2">
+          <span className="bg-emerald-950 text-emerald-400 font-mono text-[9px] font-medium px-1.5 py-0.5 rounded tracking-widest">
+            LIVE
+          </span>
+          <Link
+            to="/"
+            className="font-mono text-[9px] transition-colors"
+            style={{ color: 'var(--text3)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text3)'; }}
+          >
+            ← Back to site
+          </Link>
+        </div>
+      </div>
 
       {/* Global Search */}
       <div className="px-3 pt-3">
@@ -97,6 +115,11 @@ export function Sidebar() {
       </div>
 
       {showSearch && <GlobalSearch onClose={() => setShowSearch(false)} />}
+
+      {/* Store switcher */}
+      <div className="px-3 pt-3">
+        <StoreSwitcher />
+      </div>
 
       {/* Main nav */}
       <nav className="flex-1 px-3 py-3 flex flex-col gap-0.5">
@@ -183,6 +206,24 @@ export function Sidebar() {
             <NotificationsPanel onClose={() => setShowNotifications(false)} />
           )}
         </div>
+
+        {/* Keyboard shortcuts button */}
+        <button
+          onClick={() => setShowShortcuts(true)}
+          className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all"
+          style={{ color: 'var(--text3)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--surface2)';
+            e.currentTarget.style.color = 'var(--text)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = 'var(--text3)';
+          }}
+        >
+          <span className="font-mono">?</span>
+          <span>Keyboard shortcuts</span>
+        </button>
 
         {/* Theme toggle + user chip + sign out */}
         <div className="mt-2 flex flex-col gap-2">

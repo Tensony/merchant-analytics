@@ -5,7 +5,7 @@ import { CountUp } from '../components/ui/CountUp';
 import { TrustBadges } from '../components/ui/TrustBadges';
 import { ParticleBackground } from '../components/ui/ParticleBackground';
 import { TiltCard } from '../components/ui/TiltCard';
-import { ArrowRight, Sparkles, Zap, Shield, TrendingUp } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -83,7 +83,7 @@ interface TimelineStep {
 
 const NAV_LINKS: NavLink[] = [
   { label: 'Features',     href: '#features',     isHash: true  },
-  { label: 'Pricing',      href: '#pricing',      isHash: true  },
+  { label: 'Pricing',      href: '/pricing',      isHash: false },
   { label: 'Testimonials', href: '#testimonials', isHash: true  },
   { label: 'Integrations', href: '#integrations', isHash: true  },
 ];
@@ -299,7 +299,7 @@ function Navbar() {
 
   return (
     <nav
-      className="sticky top-0 z-50 px-6 py-4 backdrop-blur-xl"
+      className="sticky top-0 z-50 px-4 md:px-6 py-4 backdrop-blur-xl"
       style={{
         backgroundColor: 'var(--bg)',
         borderBottom: '1px solid var(--border)',
@@ -316,7 +316,7 @@ function Navbar() {
             M
           </div>
           <span
-            className="font-['Syne',sans-serif] text-[15px] font-bold tracking-tight"
+            className="font-['Syne',sans-serif] text-sm md:text-[15px] font-bold tracking-tight"
             style={{ color: 'var(--text)' }}
           >
             merchant<span className="text-emerald-400">.</span>analytics
@@ -326,22 +326,41 @@ function Navbar() {
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-1">
           {NAV_LINKS.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="text-sm px-3 py-1.5 rounded-lg transition-all"
-              style={{ color: 'var(--text2)' }}
-              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                e.currentTarget.style.backgroundColor = 'var(--surface2)';
-                e.currentTarget.style.color = 'var(--text)';
-              }}
-              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = 'var(--text2)';
-              }}
-            >
-              {item.label}
-            </a>
+            item.isHash ? (
+              <a
+                key={item.label}
+                href={item.href}
+                className="text-sm px-3 py-1.5 rounded-lg transition-all"
+                style={{ color: 'var(--text2)' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.backgroundColor = 'var(--surface2)';
+                  e.currentTarget.style.color = 'var(--text)';
+                }}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'var(--text2)';
+                }}
+              >
+                {item.label}
+              </a>
+            ) : (
+              <Link
+                key={item.label}
+                to={item.href}
+                className="text-sm px-3 py-1.5 rounded-lg transition-all"
+                style={{ color: 'var(--text2)' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.backgroundColor = 'var(--surface2)';
+                  e.currentTarget.style.color = 'var(--text)';
+                }}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'var(--text2)';
+                }}
+              >
+                {item.label}
+              </Link>
+            )
           ))}
         </div>
 
@@ -366,7 +385,7 @@ function Navbar() {
           </Link>
           <Link
             to="/register"
-            className="text-sm px-4 py-1.5 rounded-lg font-medium transition-all bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/25"
+            className="text-xs md:text-sm px-3 md:px-4 py-1.5 rounded-lg font-medium transition-all bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/25"
           >
             Get started free
           </Link>
@@ -652,7 +671,7 @@ export function LandingPage() {
       <Navbar />
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="relative px-6 pt-16 pb-20 overflow-hidden">
+      <section className="relative px-4 md:px-6 pt-12 md:pt-16 pb-16 md:pb-20 overflow-hidden">
         {/* Particle background */}
         <ParticleBackground />
         
@@ -671,21 +690,21 @@ export function LandingPage() {
         </div>
 
         {/* Floating badges */}
-        <FloatingBadge className="top-24 left-8 hidden lg:block">
+        <FloatingBadge className="top-20 left-4 md:left-8 hidden lg:block">
           <span className="text-emerald-400 font-bold text-sm">📈 +187%</span>
           <span className="text-text2 text-xs ml-2">Revenue growth</span>
         </FloatingBadge>
 
-        <FloatingBadge className="bottom-32 right-8 hidden lg:block">
+        <FloatingBadge className="bottom-32 right-4 md:right-8 hidden lg:block">
           <span className="text-amber-400 font-bold text-sm">🏆 #1</span>
           <span className="text-text2 text-xs ml-2">In Zambia</span>
         </FloatingBadge>
 
         <div className="max-w-6xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
 
             {/* Left — copy */}
-            <div className="flex flex-col gap-6 animate-slide-in-left">
+            <div className="flex flex-col gap-4 md:gap-6 animate-slide-in-left">
 
               {/* Eyebrow */}
               <div
@@ -697,14 +716,14 @@ export function LandingPage() {
                 }}
               >
                 <Sparkles size={14} className="text-emerald-400" />
-                <span className="font-mono text-[10px] tracking-wide">
+                <span className="font-mono text-[9px] md:text-[10px] tracking-wide">
                   Built for African e-commerce · Free to start
                 </span>
               </div>
 
               {/* Headline */}
               <h1
-                className="font-['Syne',sans-serif] text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1]"
+                className="font-['Syne',sans-serif] text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1]"
                 style={{ color: 'var(--text)' }}
               >
                 Know your
@@ -719,7 +738,7 @@ export function LandingPage() {
 
               {/* Sub */}
               <p
-                className="text-base lg:text-lg leading-relaxed max-w-md"
+                className="text-sm md:text-base lg:text-lg leading-relaxed max-w-md"
                 style={{ color: 'var(--text2)' }}
               >
                 Merchant Analytics gives African online stores a real-time dashboard to
@@ -728,17 +747,17 @@ export function LandingPage() {
               </p>
 
               {/* CTAs */}
-              <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <Link
                   to="/register"
-                  className="group relative px-6 py-3 rounded-xl text-sm font-semibold transition-all bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/30"
+                  className="group relative px-6 py-3 rounded-xl text-sm font-semibold transition-all bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/30 text-center"
                 >
                   Start for free
                   <ArrowRight size={16} className="inline ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
                   to="/app"
-                  className="px-6 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 hover:scale-105"
+                  className="px-6 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 hover:scale-105"
                   style={{ border: '1px solid var(--border)', color: 'var(--text2)' }}
                   onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     e.currentTarget.style.backgroundColor = 'var(--surface2)';
@@ -753,12 +772,12 @@ export function LandingPage() {
               </div>
 
               {/* Trust Badges */}
-              <div className="pt-4">
+              <div className="pt-2 md:pt-4">
                 <TrustBadges />
               </div>
 
               {/* Social proof */}
-              <div className="flex items-center gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2 md:pt-4">
                 <div className="flex -space-x-2">
                   {AVATAR_INIT.map((init, i) => (
                     <div
@@ -789,7 +808,7 @@ export function LandingPage() {
             </div>
 
             {/* Right — dashboard preview */}
-            <div className="relative animate-slide-in-right">
+            <div className="relative hidden lg:block animate-slide-in-right">
               <div
                 className="absolute inset-0 rounded-3xl"
                 style={{
@@ -805,7 +824,7 @@ export function LandingPage() {
 
       {/* ── Marquee Logo bar ──────────────────────────────────────────────────── */}
       <section
-        className="py-8 overflow-hidden"
+        className="py-6 md:py-8 overflow-hidden"
         style={{
           borderTop: '1px solid var(--border)',
           borderBottom: '1px solid var(--border)',
@@ -815,11 +834,11 @@ export function LandingPage() {
           {[...LOGOS, ...LOGOS, ...LOGOS].map((logo, i) => (
             <div
               key={i}
-              className="flex items-center gap-3 mx-8 opacity-50 hover:opacity-100 transition-all hover:scale-110 cursor-default"
+              className="flex items-center gap-2 md:gap-3 mx-4 md:mx-8 opacity-50 hover:opacity-100 transition-all hover:scale-110 cursor-default"
             >
-              <span className="text-xl">{logo.country}</span>
+              <span className="text-lg md:text-xl">{logo.country}</span>
               <span
-                className="font-['Syne',sans-serif] text-sm font-semibold whitespace-nowrap"
+                className="font-['Syne',sans-serif] text-xs md:text-sm font-semibold whitespace-nowrap"
                 style={{ color: 'var(--text2)' }}
               >
                 {logo.name}
@@ -830,12 +849,12 @@ export function LandingPage() {
       </section>
 
       {/* ── Stats ─────────────────────────────────────────────────────────── */}
-      <section className="py-16 px-6">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="py-12 md:py-16 px-4 md:px-6">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {STATS.map((s, i) => (
             <div
               key={s.label}
-              className="rounded-xl p-5 text-center transition-all hover:scale-105 animate-fade-in"
+              className="rounded-xl p-4 md:p-5 text-center transition-all hover:scale-105 animate-fade-in"
               style={{
                 backgroundColor: 'var(--surface)',
                 border: '1px solid var(--border)',
@@ -843,7 +862,7 @@ export function LandingPage() {
               }}
             >
               <p
-                className="text-3xl lg:text-4xl font-bold tracking-tight mb-1"
+                className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight mb-1"
                 style={{ color: s.color }}
               >
                 <CountUp end={s.value} prefix={s.prefix} suffix={s.suffix} />
@@ -859,29 +878,29 @@ export function LandingPage() {
       {/* ── Features ──────────────────────────────────────────────────────── */}
       <section
         id="features"
-        className="py-20 px-6"
+        className="py-16 md:py-20 px-4 md:px-6"
         style={{ borderTop: '1px solid var(--border)' }}
       >
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
 
             {/* Left sticky text */}
             <div className="lg:sticky lg:top-24">
               <p
-                className="font-mono text-[11px] tracking-widest uppercase mb-4"
+                className="font-mono text-[10px] md:text-[11px] tracking-widest uppercase mb-4"
                 style={{ color: 'var(--text3)' }}
               >
                 Features
               </p>
               <h2
-                className="font-['Syne',sans-serif] text-3xl lg:text-4xl font-bold tracking-tight leading-tight mb-4"
+                className="font-['Syne',sans-serif] text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight leading-tight mb-4"
                 style={{ color: 'var(--text)' }}
               >
                 Everything you need to
                 <span className="text-emerald-400"> run smarter.</span>
               </h2>
               <p
-                className="text-base leading-relaxed mb-8"
+                className="text-sm md:text-base leading-relaxed mb-8"
                 style={{ color: 'var(--text2)' }}
               >
                 Built specifically for how African e-commerce works — mobile money,
@@ -891,7 +910,7 @@ export function LandingPage() {
                 {CHECKLIST.map((item) => (
                   <div key={item} className="flex items-center gap-2.5">
                     <span className="text-emerald-400 text-xs">✓</span>
-                    <span className="text-sm" style={{ color: 'var(--text2)' }}>
+                    <span className="text-xs md:text-sm" style={{ color: 'var(--text2)' }}>
                       {item}
                     </span>
                   </div>
@@ -904,7 +923,7 @@ export function LandingPage() {
               {FEATURES.map((f, i) => (
                 <TiltCard
                   key={f.title}
-                  className="rounded-xl p-5 flex flex-col gap-3 cursor-default"
+                  className="rounded-xl p-4 md:p-5 flex flex-col gap-3 cursor-default"
                   style={{
                     backgroundColor: 'var(--surface)',
                     border: '1px solid var(--border)',
@@ -913,13 +932,13 @@ export function LandingPage() {
                 >
                   <div className="flex items-start justify-between">
                     <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center text-base"
+                      className="w-9 h-9 md:w-10 md:h-10 rounded-lg flex items-center justify-center text-sm md:text-base"
                       style={{ backgroundColor: f.color + '22', color: f.color }}
                     >
                       {f.icon}
                     </div>
                     <span
-                      className="font-mono text-[9px] px-2 py-0.5 rounded-full"
+                      className="font-mono text-[8px] md:text-[9px] px-2 py-0.5 rounded-full"
                       style={{ backgroundColor: f.color + '15', color: f.color }}
                     >
                       {f.tag}
@@ -943,19 +962,19 @@ export function LandingPage() {
 
       {/* ── Dashboard Screenshots Gallery ────────────────────────────────────── */}
       <section
-        className="py-20 px-6 overflow-hidden"
+        className="py-16 md:py-20 px-4 md:px-6 overflow-hidden"
         style={{ borderTop: '1px solid var(--border)' }}
       >
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 md:mb-14">
             <p
-              className="font-mono text-[11px] tracking-widest uppercase mb-3"
+              className="font-mono text-[10px] md:text-[11px] tracking-widest uppercase mb-3"
               style={{ color: 'var(--text3)' }}
             >
               Beautiful by design
             </p>
             <h2
-              className="font-['Syne',sans-serif] text-3xl lg:text-4xl font-bold tracking-tight"
+              className="font-['Syne',sans-serif] text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight"
               style={{ color: 'var(--text)' }}
             >
               Everything you need,{' '}
@@ -963,7 +982,7 @@ export function LandingPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {DASHBOARD_SCREENS.map((screen, i) => (
               <TiltCard
                 key={screen.title}
@@ -977,21 +996,21 @@ export function LandingPage() {
                 <div className="relative group">
                   {/* Mock browser chrome */}
                   <div
-                    className="px-4 py-2 flex items-center gap-2"
+                    className="px-3 md:px-4 py-2 flex items-center gap-2"
                     style={{ borderBottom: '1px solid var(--border)' }}
                   >
                     <div className="flex gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/60" />
+                      <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-red-400/60" />
+                      <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-amber-400/60" />
+                      <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-emerald-400/60" />
                     </div>
-                    <span className="text-[10px] font-mono ml-2" style={{ color: 'var(--text3)' }}>
+                    <span className="text-[9px] md:text-[10px] font-mono ml-2" style={{ color: 'var(--text3)' }}>
                       {screen.title.toLowerCase().replace(' ', '-')}
                     </span>
                   </div>
 
                   {/* Screenshot placeholder with gradient */}
-                  <div className="relative h-48 overflow-hidden">
+                  <div className="relative h-40 md:h-48 overflow-hidden">
                     <div
                       className="absolute inset-0"
                       style={{
@@ -1000,12 +1019,12 @@ export function LandingPage() {
                     />
                     
                     {/* Mock chart elements */}
-                    <div className="absolute inset-0 p-4">
+                    <div className="absolute inset-0 p-3 md:p-4">
                       <div className="flex gap-1 mb-3">
-                        <div className="w-16 h-3 rounded" style={{ backgroundColor: screen.color + '44' }} />
-                        <div className="w-8 h-3 rounded" style={{ backgroundColor: screen.color + '22' }} />
+                        <div className="w-12 md:w-16 h-2 md:h-3 rounded" style={{ backgroundColor: screen.color + '44' }} />
+                        <div className="w-6 md:w-8 h-2 md:h-3 rounded" style={{ backgroundColor: screen.color + '22' }} />
                       </div>
-                      <div className="flex items-end gap-1 h-24">
+                      <div className="flex items-end gap-1 h-20 md:h-24">
                         {[60, 45, 80, 35, 70, 55, 90, 50].map((h, j) => (
                           <div
                             key={j}
@@ -1017,10 +1036,10 @@ export function LandingPage() {
                           />
                         ))}
                       </div>
-                      <div className="grid grid-cols-3 gap-2 mt-4">
-                        <div className="h-8 rounded" style={{ backgroundColor: screen.color + '22' }} />
-                        <div className="h-8 rounded" style={{ backgroundColor: screen.color + '22' }} />
-                        <div className="h-8 rounded" style={{ backgroundColor: screen.color + '22' }} />
+                      <div className="grid grid-cols-3 gap-2 mt-3 md:mt-4">
+                        <div className="h-6 md:h-8 rounded" style={{ backgroundColor: screen.color + '22' }} />
+                        <div className="h-6 md:h-8 rounded" style={{ backgroundColor: screen.color + '22' }} />
+                        <div className="h-6 md:h-8 rounded" style={{ backgroundColor: screen.color + '22' }} />
                       </div>
                     </div>
 
@@ -1039,7 +1058,7 @@ export function LandingPage() {
                   </div>
 
                   {/* Caption */}
-                  <div className="p-4">
+                  <div className="p-3 md:p-4">
                     <h4 className="font-semibold text-sm mb-1" style={{ color: 'var(--text)' }}>
                       {screen.title}
                     </h4>
@@ -1056,19 +1075,19 @@ export function LandingPage() {
 
       {/* ── How It Works Timeline ────────────────────────────────────────────── */}
       <section
-        className="py-20 px-6"
+        className="py-16 md:py-20 px-4 md:px-6"
         style={{ borderTop: '1px solid var(--border)' }}
       >
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 md:mb-14">
             <p
-              className="font-mono text-[11px] tracking-widest uppercase mb-3"
+              className="font-mono text-[10px] md:text-[11px] tracking-widest uppercase mb-3"
               style={{ color: 'var(--text3)' }}
             >
               Get started in minutes
             </p>
             <h2
-              className="font-['Syne',sans-serif] text-3xl lg:text-4xl font-bold tracking-tight"
+              className="font-['Syne',sans-serif] text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight"
               style={{ color: 'var(--text)' }}
             >
               From zero to insights{' '}
@@ -1083,7 +1102,7 @@ export function LandingPage() {
               style={{ backgroundColor: 'var(--border)' }}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 relative">
               {TIMELINE_STEPS.map((step, i) => (
                 <div
                   key={step.step}
@@ -1091,9 +1110,9 @@ export function LandingPage() {
                   style={{ animationDelay: `${i * 150}ms` }}
                 >
                   {/* Step number circle */}
-                  <div className="flex justify-center mb-6">
+                  <div className="flex justify-center mb-4 md:mb-6">
                     <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg relative z-10 animate-scale-pulse"
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-base md:text-lg relative z-10 animate-scale-pulse"
                       style={{
                         backgroundColor: step.color,
                         color: '#0d0f12',
@@ -1106,9 +1125,9 @@ export function LandingPage() {
 
                   {/* Content */}
                   <div className="text-center">
-                    <div className="text-3xl mb-3">{step.icon}</div>
+                    <div className="text-2xl md:text-3xl mb-2 md:mb-3">{step.icon}</div>
                     <h4
-                      className="font-['Syne',sans-serif] text-base font-semibold mb-2"
+                      className="font-['Syne',sans-serif] text-sm md:text-base font-semibold mb-2"
                       style={{ color: 'var(--text)' }}
                     >
                       {step.title}
@@ -1122,10 +1141,10 @@ export function LandingPage() {
             </div>
 
             {/* CTA */}
-            <div className="text-center mt-12">
+            <div className="text-center mt-10 md:mt-12">
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] transition-all hover:scale-105"
+                className="inline-flex items-center gap-2 px-5 md:px-6 py-3 rounded-xl text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] transition-all hover:scale-105"
               >
                 Start your free journey
                 <ArrowRight size={16} />
@@ -1137,34 +1156,34 @@ export function LandingPage() {
 
       {/* ── Why Merchants Love Us ────────────────────────────────────────────── */}
       <section
-        className="py-20 px-6"
+        className="py-16 md:py-20 px-4 md:px-6"
         style={{ borderTop: '1px solid var(--border)' }}
       >
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10 md:mb-12">
             <p
-              className="font-mono text-[11px] tracking-widest uppercase mb-3"
+              className="font-mono text-[10px] md:text-[11px] tracking-widest uppercase mb-3"
               style={{ color: 'var(--text3)' }}
             >
               Why merchants love us
             </p>
             <h2
-              className="font-['Syne',sans-serif] text-3xl font-bold tracking-tight"
+              className="font-['Syne',sans-serif] text-2xl md:text-3xl font-bold tracking-tight"
               style={{ color: 'var(--text)' }}
             >
               Built for African e-commerce
             </h2>
-            <p className="text-sm mt-3 max-w-2xl mx-auto" style={{ color: 'var(--text2)' }}>
+            <p className="text-xs md:text-sm mt-3 max-w-2xl mx-auto" style={{ color: 'var(--text2)' }}>
               We understand the unique challenges and opportunities of selling online in Africa.
               Here's what sets us apart.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
             {WHY_LOVE_US.map((item, i) => (
               <TiltCard
                 key={item.title}
-                className="rounded-xl p-6 flex flex-col gap-3 animate-fade-in"
+                className="rounded-xl p-5 md:p-6 flex flex-col gap-3 animate-fade-in"
                 style={{
                   backgroundColor: 'var(--surface)',
                   border: '1px solid var(--border)',
@@ -1172,18 +1191,18 @@ export function LandingPage() {
                 }}
               >
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-xl md:text-2xl"
                   style={{ backgroundColor: item.color + '22' }}
                 >
                   {item.icon}
                 </div>
                 <h3
-                  className="font-['Syne',sans-serif] text-base font-semibold"
+                  className="font-['Syne',sans-serif] text-sm md:text-base font-semibold"
                   style={{ color: 'var(--text)' }}
                 >
                   {item.title}
                 </h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--text2)' }}>
+                <p className="text-xs md:text-sm leading-relaxed" style={{ color: 'var(--text2)' }}>
                   {item.desc}
                 </p>
               </TiltCard>
@@ -1191,31 +1210,31 @@ export function LandingPage() {
           </div>
 
           {/* Trust indicators */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-6">
+          <div className="mt-10 md:mt-12 flex flex-wrap items-center justify-center gap-4 md:gap-6">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <span className="text-emerald-400 text-sm">✓</span>
+              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                <span className="text-emerald-400 text-xs md:text-sm">✓</span>
               </div>
               <span className="text-xs" style={{ color: 'var(--text2)' }}>2,400+ active stores</span>
             </div>
-            <div className="w-1 h-1 rounded-full bg-border" />
+            <div className="w-1 h-1 rounded-full bg-border hidden sm:block" />
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <span className="text-emerald-400 text-sm">✓</span>
+              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                <span className="text-emerald-400 text-xs md:text-sm">✓</span>
               </div>
               <span className="text-xs" style={{ color: 'var(--text2)' }}>14 African countries</span>
             </div>
-            <div className="w-1 h-1 rounded-full bg-border" />
+            <div className="w-1 h-1 rounded-full bg-border hidden sm:block" />
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <span className="text-emerald-400 text-sm">✓</span>
+              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                <span className="text-emerald-400 text-xs md:text-sm">✓</span>
               </div>
               <span className="text-xs" style={{ color: 'var(--text2)' }}>99.9% uptime SLA</span>
             </div>
-            <div className="w-1 h-1 rounded-full bg-border" />
+            <div className="w-1 h-1 rounded-full bg-border hidden sm:block" />
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <span className="text-emerald-400 text-sm">✓</span>
+              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                <span className="text-emerald-400 text-xs md:text-sm">✓</span>
               </div>
               <span className="text-xs" style={{ color: 'var(--text2)' }}>GDPR & POPIA compliant</span>
             </div>
@@ -1226,38 +1245,38 @@ export function LandingPage() {
       {/* ── Integrations ──────────────────────────────────────────────────── */}
       <section
         id="integrations"
-        className="py-20 px-6"
+        className="py-16 md:py-20 px-4 md:px-6"
         style={{ borderTop: '1px solid var(--border)' }}
       >
         <div className="max-w-4xl mx-auto text-center">
           <p
-            className="font-mono text-[11px] tracking-widest uppercase mb-3"
+            className="font-mono text-[10px] md:text-[11px] tracking-widest uppercase mb-3"
             style={{ color: 'var(--text3)' }}
           >
             Integrations
           </p>
           <h2
-            className="font-['Syne',sans-serif] text-3xl font-bold tracking-tight mb-3"
+            className="font-['Syne',sans-serif] text-2xl md:text-3xl font-bold tracking-tight mb-3"
             style={{ color: 'var(--text)' }}
           >
             Connects with the tools you already use
           </h2>
-          <p className="text-sm mb-12" style={{ color: 'var(--text2)' }}>
+          <p className="text-xs md:text-sm mb-10 md:mb-12" style={{ color: 'var(--text2)' }}>
             One-click integrations with Africa's most popular commerce and payment platforms.
           </p>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
             {INTEGRATIONS.map((int) => (
               <TiltCard
                 key={int.name}
-                className="rounded-xl p-5 flex items-center gap-4"
+                className="rounded-xl p-4 md:p-5 flex items-center gap-3 md:gap-4"
                 style={{
                   backgroundColor: 'var(--surface)',
                   border: '1px solid var(--border)',
                 }}
               >
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                  className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-base md:text-lg flex-shrink-0"
                   style={{ backgroundColor: int.color + '22', color: int.color }}
                 >
                   {int.icon}
@@ -1266,7 +1285,7 @@ export function LandingPage() {
                   <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>
                     {int.name}
                   </p>
-                  <p className="text-xs" style={{ color: 'var(--text3)' }}>
+                  <p className="text-[10px] md:text-xs" style={{ color: 'var(--text3)' }}>
                     One-click connect
                   </p>
                 </div>
@@ -1279,30 +1298,30 @@ export function LandingPage() {
       {/* ── Testimonials ──────────────────────────────────────────────────── */}
       <section
         id="testimonials"
-        className="py-20 px-6"
+        className="py-16 md:py-20 px-4 md:px-6"
         style={{ borderTop: '1px solid var(--border)' }}
       >
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 md:mb-14">
             <p
-              className="font-mono text-[11px] tracking-widest uppercase mb-3"
+              className="font-mono text-[10px] md:text-[11px] tracking-widest uppercase mb-3"
               style={{ color: 'var(--text3)' }}
             >
               Customer stories
             </p>
             <h2
-              className="font-['Syne',sans-serif] text-3xl font-bold tracking-tight"
+              className="font-['Syne',sans-serif] text-2xl md:text-3xl font-bold tracking-tight"
               style={{ color: 'var(--text)' }}
             >
               Real results from real African stores
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
             {TESTIMONIALS.map((t, i) => (
               <TiltCard
                 key={t.name}
-                className="rounded-xl p-6 flex flex-col gap-5 animate-fade-in"
+                className="rounded-xl p-5 md:p-6 flex flex-col gap-4 md:gap-5 animate-fade-in"
                 style={{
                   backgroundColor: 'var(--surface)',
                   border: '1px solid var(--border)',
@@ -1317,18 +1336,18 @@ export function LandingPage() {
                   }}
                 >
                   <p
-                    className="font-['Syne',sans-serif] text-2xl font-bold"
+                    className="font-['Syne',sans-serif] text-xl md:text-2xl font-bold"
                     style={{ color: t.color }}
                   >
                     {t.metric}
                   </p>
-                  <p className="text-[11px]" style={{ color: 'var(--text3)' }}>
+                  <p className="text-[10px] md:text-[11px]" style={{ color: 'var(--text3)' }}>
                     {t.metricLabel}
                   </p>
                 </div>
 
                 <p
-                  className="text-sm leading-relaxed italic flex-1"
+                  className="text-xs md:text-sm leading-relaxed italic flex-1"
                   style={{ color: 'var(--text2)' }}
                 >
                   "{t.quote}"
@@ -1336,7 +1355,7 @@ export function LandingPage() {
 
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center font-mono text-xs font-medium flex-shrink-0"
+                    className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center font-mono text-xs font-medium flex-shrink-0"
                     style={{ backgroundColor: t.color + '22', color: t.color }}
                   >
                     {t.avatar}
@@ -1359,33 +1378,33 @@ export function LandingPage() {
       {/* ─── Pricing ───────────────────────────────────────────────────────── */}
       <section
         id="pricing"
-        className="py-20 px-6"
+        className="py-16 md:py-20 px-4 md:px-6"
         style={{ borderTop: '1px solid var(--border)' }}
       >
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 md:mb-14">
             <p
-              className="font-mono text-[11px] tracking-widest uppercase mb-3"
+              className="font-mono text-[10px] md:text-[11px] tracking-widest uppercase mb-3"
               style={{ color: 'var(--text3)' }}
             >
               Pricing
             </p>
             <h2
-              className="font-['Syne',sans-serif] text-3xl font-bold tracking-tight"
+              className="font-['Syne',sans-serif] text-2xl md:text-3xl font-bold tracking-tight"
               style={{ color: 'var(--text)' }}
             >
               Start free. Scale when ready.
             </h2>
-            <p className="text-sm mt-3" style={{ color: 'var(--text2)' }}>
+            <p className="text-xs md:text-sm mt-3" style={{ color: 'var(--text2)' }}>
               No credit card required. Cancel anytime.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
             {PRICING.map((tier, i) => (
               <TiltCard
                 key={tier.name}
-                className="rounded-xl p-6 flex flex-col gap-5 relative animate-fade-in"
+                className="rounded-xl p-5 md:p-6 flex flex-col gap-4 md:gap-5 relative animate-fade-in"
                 style={{
                   backgroundColor: 'var(--surface)',
                   border: tier.popular
@@ -1396,7 +1415,7 @@ export function LandingPage() {
               >
                 {tier.popular && (
                   <div
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 font-mono text-[10px] font-medium px-3 py-1 rounded-full whitespace-nowrap animate-pulse"
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 font-mono text-[9px] md:text-[10px] font-medium px-3 py-1 rounded-full whitespace-nowrap animate-pulse"
                     style={{ backgroundColor: tier.color, color: '#0d0f12' }}
                   >
                     Most popular
@@ -1412,7 +1431,7 @@ export function LandingPage() {
                   </p>
                   <div className="flex items-baseline gap-1">
                     <span
-                      className="font-['Syne',sans-serif] text-4xl font-bold tracking-tight"
+                      className="font-['Syne',sans-serif] text-3xl md:text-4xl font-bold tracking-tight"
                       style={{ color: tier.color }}
                     >
                       {tier.price}
@@ -1423,7 +1442,7 @@ export function LandingPage() {
                   </div>
                 </div>
 
-                <ul className="flex flex-col gap-2.5 flex-1">
+                <ul className="flex flex-col gap-2 md:gap-2.5 flex-1">
                   {tier.features.map((feat) => (
                     <li
                       key={feat}
@@ -1465,12 +1484,12 @@ export function LandingPage() {
 
       {/* ─── CTA Banner ────────────────────────────────────────────────────── */}
       <section
-        className="py-20 px-6"
+        className="py-16 md:py-20 px-4 md:px-6"
         style={{ borderTop: '1px solid var(--border)' }}
       >
         <div className="max-w-4xl mx-auto">
           <div
-            className="rounded-2xl p-12 flex flex-col items-center text-center gap-6 relative overflow-hidden animate-border-glow"
+            className="rounded-2xl p-8 md:p-12 flex flex-col items-center text-center gap-4 md:gap-6 relative overflow-hidden animate-border-glow"
             style={{
               backgroundColor: 'var(--surface)',
               border: '1px solid #22d98a33',
@@ -1482,29 +1501,29 @@ export function LandingPage() {
                 background: 'radial-gradient(ellipse at 50% 0%, #22d98a, transparent 70%)',
               }}
             />
-            <div className="relative flex flex-col items-center gap-6">
+            <div className="relative flex flex-col items-center gap-4 md:gap-6">
               <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
               <h2
-                className="font-['Syne',sans-serif] text-4xl font-bold tracking-tight"
+                className="font-['Syne',sans-serif] text-3xl md:text-4xl font-bold tracking-tight"
                 style={{ color: 'var(--text)' }}
               >
                 Ready to grow your store?
               </h2>
-              <p className="text-base max-w-lg" style={{ color: 'var(--text2)' }}>
+              <p className="text-sm md:text-base max-w-lg" style={{ color: 'var(--text2)' }}>
                 Join 2,400+ African online stores already using Merchant Analytics
                 to make faster, smarter business decisions. Start free today.
               </p>
-              <div className="flex items-center gap-3 flex-wrap justify-center">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <Link
                   to="/register"
-                  className="group px-8 py-3 rounded-xl text-sm font-semibold transition-all bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/30"
+                  className="group px-6 md:px-8 py-3 rounded-xl text-sm font-semibold transition-all bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/30 text-center"
                 >
                   Get started for free
                   <ArrowRight size={16} className="inline ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
                   to="/app"
-                  className="px-6 py-3 rounded-xl text-sm font-medium transition-all hover:scale-105"
+                  className="px-6 py-3 rounded-xl text-sm font-medium transition-all hover:scale-105 text-center"
                   style={{ border: '1px solid var(--border)', color: 'var(--text2)' }}
                   onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
                     e.currentTarget.style.backgroundColor = 'var(--surface2)';
@@ -1526,11 +1545,11 @@ export function LandingPage() {
 
       {/* ─── Footer ────────────────────────────────────────────────────────── */}
       <footer
-        className="py-12 px-6"
+        className="py-10 md:py-12 px-4 md:px-6"
         style={{ borderTop: '1px solid var(--border)' }}
       >
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10">
 
             {/* Brand */}
             <div className="col-span-1 flex flex-col gap-4">
@@ -1566,21 +1585,44 @@ export function LandingPage() {
                 Product
               </p>
               <div className="flex flex-col gap-2.5">
-                {['Features', 'Pricing', 'Integrations', 'Changelog', 'Roadmap'].map((item) => (
-                  <a
-                    key={item}
-                    href="#"
-                    className="text-xs transition-colors hover:translate-x-1"
-                    style={{ color: 'var(--text2)' }}
-                    onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      e.currentTarget.style.color = 'var(--text)';
-                    }}
-                    onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      e.currentTarget.style.color = 'var(--text2)';
-                    }}
-                  >
-                    {item}
-                  </a>
+                {[
+                  { label: 'Features',     href: '#features'   },
+                  { label: 'Pricing',      href: '/pricing'    },
+                  { label: 'Integrations', href: '#integrations'},
+                  { label: 'Changelog',    href: '/changelog'  },
+                  { label: 'Status',       href: '/status'     },
+                ].map((item) => (
+                  item.href.startsWith('#') ? (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      className="text-xs transition-colors hover:translate-x-1"
+                      style={{ color: 'var(--text2)' }}
+                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                        e.currentTarget.style.color = 'var(--text)';
+                      }}
+                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                        e.currentTarget.style.color = 'var(--text2)';
+                      }}
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={item.label}
+                      to={item.href}
+                      className="text-xs transition-colors hover:translate-x-1"
+                      style={{ color: 'var(--text2)' }}
+                      onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                        e.currentTarget.style.color = 'var(--text)';
+                      }}
+                      onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                        e.currentTarget.style.color = 'var(--text2)';
+                      }}
+                    >
+                      {item.label}
+                    </Link>
+                  )
                 ))}
               </div>
             </div>
@@ -1644,7 +1686,7 @@ export function LandingPage() {
 
           {/* Bottom bar */}
           <div
-            className="flex items-center justify-between pt-6 flex-wrap gap-4"
+            className="flex flex-col sm:flex-row items-center justify-between pt-6 gap-4"
             style={{ borderTop: '1px solid var(--border)' }}
           >
             <p className="text-xs" style={{ color: 'var(--text3)' }}>

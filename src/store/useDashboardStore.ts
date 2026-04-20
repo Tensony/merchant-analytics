@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { MetricKey, TimeRange, ChartType, Product, Campaign, AppNotification } from '../types';
+import type { MetricKey, TimeRange, ChartType, Product, Campaign, AppNotification, Store } from '../types';
 import { PRODUCTS, CAMPAIGNS } from '../data/mockData';
 
 interface UserProfile {
@@ -23,6 +23,17 @@ interface DashboardState {
   timeRange:     TimeRange;
   chartType:     ChartType;
   theme:         'dark' | 'light';
+
+  // Onboarding
+  hasCompletedDashboardTour: boolean;
+  completeDashboardTour:     () => void;
+  resetDashboardTour:        () => void;
+
+  // Store management
+  stores:       Store[];
+  activeStore:  string | null;
+  switchStore:  (storeId: string) => void;
+  addStore:     (store: Store) => void;
 
   // Data
   products:  Product[];
@@ -54,6 +65,26 @@ interface DashboardState {
   updateNotifications: (n: Partial<NotificationSettings>) => void;
 }
 
+// Default stores
+const DEFAULT_STORES: Store[] = [
+  {
+    id:       'store-1',
+    name:     'Lusaka Flagship',
+    country:  'Zambia',
+    flag:     '🇿🇲',
+    currency: 'ZMW',
+    plan:     'growth',
+  },
+  {
+    id:       'store-2',
+    name:     'Accra Digital',
+    country:  'Ghana',
+    flag:     '🇬🇭',
+    currency: 'GHS',
+    plan:     'starter',
+  },
+];
+
 export const useDashboardStore = create<DashboardState>()(
   persist(
     (set) => ({
@@ -62,6 +93,20 @@ export const useDashboardStore = create<DashboardState>()(
       timeRange:    '30d',
       chartType:    'bar',
       theme:        'dark',
+
+      // Onboarding state
+      hasCompletedDashboardTour: false,
+      completeDashboardTour: () => set({ hasCompletedDashboardTour: true }),
+      resetDashboardTour: () => set({ hasCompletedDashboardTour: false }),
+
+      // Store management
+      stores:      DEFAULT_STORES,
+      activeStore: 'store-1',
+      switchStore: (storeId) => set({ activeStore: storeId }),
+      addStore:    (store) => set((s) => ({ 
+        stores: [...s.stores, store],
+        activeStore: store.id,
+      })),
 
       products:  PRODUCTS,
       campaigns: CAMPAIGNS,
