@@ -6,6 +6,7 @@ import { TrustBadges } from '../components/ui/TrustBadges';
 import { ParticleBackground } from '../components/ui/ParticleBackground';
 import { TiltCard } from '../components/ui/TiltCard';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -296,6 +297,7 @@ function FloatingBadge({ children, className = '' }: { children: React.ReactNode
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isAuth } = useAuthStore();
 
   return (
     <nav
@@ -325,7 +327,7 @@ function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-1">
-          {NAV_LINKS.map((item) => (
+          {NAV_LINKS.map((item) =>
             item.isHash ? (
               <a
                 key={item.label}
@@ -361,34 +363,49 @@ function Navbar() {
                 {item.label}
               </Link>
             )
-          ))}
+          )}
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Link
-            to="/login"
-            className="hidden md:block text-sm px-3 py-1.5 rounded-lg transition-all"
-            style={{
-              color: 'var(--text2)',
-              border: '1px solid var(--border)',
-            }}
-            onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
-              e.currentTarget.style.backgroundColor = 'var(--surface2)';
-            }}
-            onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-          >
-            Sign in
-          </Link>
-          <Link
-            to="/register"
-            className="text-xs md:text-sm px-3 md:px-4 py-1.5 rounded-lg font-medium transition-all bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/25"
-          >
-            Get started free
-          </Link>
+
+          {isAuth ? (
+            /* Already logged in — show dashboard button */
+            <Link
+              to="/app"
+              className="text-xs md:text-sm px-3 md:px-4 py-1.5 rounded-lg font-medium transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] flex items-center gap-2"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0d0f12] animate-pulse" />
+              Go to dashboard
+            </Link>
+          ) : (
+            /* Not logged in — show sign in + get started */
+            <>
+              <Link
+                to="/login"
+                className="hidden md:block text-sm px-3 py-1.5 rounded-lg transition-all"
+                style={{
+                  color: 'var(--text2)',
+                  border: '1px solid var(--border)',
+                }}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.backgroundColor = 'var(--surface2)';
+                }}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/register"
+                className="text-xs md:text-sm px-3 md:px-4 py-1.5 rounded-lg font-medium transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
+              >
+                Get started free
+              </Link>
+            </>
+          )}
 
           {/* Mobile menu button */}
           <button
@@ -424,13 +441,23 @@ function Navbar() {
               {item}
             </a>
           ))}
-          <Link
-            to="/login"
-            className="px-3 py-2 rounded-lg text-sm"
-            style={{ color: 'var(--text2)' }}
-          >
-            Sign in
-          </Link>
+          {isAuth ? (
+            <Link
+              to="/app"
+              onClick={() => setMenuOpen(false)}
+              className="px-3 py-2 rounded-lg text-sm font-medium text-emerald-400"
+            >
+              → Go to dashboard
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="px-3 py-2 rounded-lg text-sm"
+              style={{ color: 'var(--text2)' }}
+            >
+              Sign in
+            </Link>
+          )}
         </div>
       )}
     </nav>
@@ -666,6 +693,8 @@ function DashboardPreview() {
 // ─── Landing page ─────────────────────────────────────────────────────────────
 
 export function LandingPage() {
+  const { isAuth } = useAuthStore();
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -756,7 +785,7 @@ export function LandingPage() {
                   <ArrowRight size={16} className="inline ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
-                  to="/app"
+                  to={isAuth ? '/app' : '/login'}
                   className="px-6 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 hover:scale-105"
                   style={{ border: '1px solid var(--border)', color: 'var(--text2)' }}
                   onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -767,7 +796,7 @@ export function LandingPage() {
                   }}
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  View live demo
+                  {isAuth ? 'Go to dashboard' : 'View live demo'}
                 </Link>
               </div>
 
@@ -1522,7 +1551,7 @@ export function LandingPage() {
                   <ArrowRight size={16} className="inline ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
-                  to="/app"
+                  to={isAuth ? '/app' : '/login'}
                   className="px-6 py-3 rounded-xl text-sm font-medium transition-all hover:scale-105 text-center"
                   style={{ border: '1px solid var(--border)', color: 'var(--text2)' }}
                   onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -1532,7 +1561,7 @@ export function LandingPage() {
                     e.currentTarget.style.backgroundColor = 'transparent';
                   }}
                 >
-                  View live demo →
+                  {isAuth ? 'Go to dashboard' : 'View live demo →'}
                 </Link>
               </div>
               <p className="text-xs" style={{ color: 'var(--text3)' }}>

@@ -1,79 +1,96 @@
-import { clsx } from 'clsx';
+import { useMemo } from 'react';
 import { Sparkline } from '../charts/Sparkline';
 import type { MetricKey } from '../../types';
+import { clsx } from 'clsx';
 
 interface KpiCardProps {
-  title?: string;
-  value: string;
-  change?: number;
-  metricKey?: MetricKey;
-  label?: string;
-  delta?: string;
-  deltaType?: 'up' | 'down';
-  subtext?: string;
-  sparkData?: number[];
+  metricKey:   MetricKey;
+  label:       string;
+  value:       string;
+  delta:       string;
+  deltaType:   'up' | 'down' | 'neutral';
+  subtext?:    string;
+  sparkData?:  number[];
   sparkColor?: string;
-  isActive?: boolean;
-  onClick?: (key: MetricKey) => void;
+  isActive?:   boolean;
+  onClick?:    (key: MetricKey) => void;
 }
 
 export function KpiCard({
-  title,
-  value,
-  change,
   metricKey,
   label,
+  value,
   delta,
   deltaType,
   subtext,
   sparkData,
-  sparkColor,
-  isActive,
+  sparkColor = '#22d98a',
+  isActive = false,
   onClick,
 }: KpiCardProps) {
-  const displayLabel = label || title || '';
-  const displayDelta = delta || (change ? `${change > 0 ? '+' : ''}${change}%` : '');
-  const displayDeltaType = deltaType || (change ? (change > 0 ? 'up' : 'down') : 'up');
-  const displaySubtext = subtext || '';
-  const displaySparkData = sparkData || [];
-  const displaySparkColor = sparkColor || '#e8eaf0';
-  const displayIsActive = isActive || false;
-  const displayOnClick = onClick || (() => {});
+  const isUp = deltaType === 'up';
+  const isDown = deltaType === 'down';
+  
+  const deltaColor = isUp ? 'var(--green)' : isDown ? 'var(--red)' : 'var(--text3)';
+
+  const sparklineData = useMemo(() => sparkData ?? [], [sparkData]);
 
   return (
-    <button
-      onClick={() => displayOnClick(metricKey || 'revenue')}
+    <div
+      onClick={() => onClick?.(metricKey)}
       className={clsx(
-        'text-left bg-[#161920] border rounded-xl p-4 transition-all duration-150 w-full',
-        displayIsActive
-          ? 'border-emerald-500 shadow-[0_0_0_1px_rgba(34,217,138,0.15)]'
-          : 'border-[#2a2f3d] hover:border-[#363d50]'
+        'rounded-xl p-3 md:p-4 transition-all cursor-pointer',
+        'border hover:scale-[1.02] hover:shadow-lg',
+        isActive ? 'border-emerald-400 shadow-md' : ''
       )}
+      style={{
+        backgroundColor: 'var(--surface)',
+        borderColor: isActive ? 'var(--green)' : 'var(--border)',
+        boxShadow: isActive ? '0 0 0 1px var(--green)' : undefined,
+      }}
     >
-      <p className="font-mono text-[10px] tracking-widest uppercase text-[#555c70] mb-2">
-        {displayLabel}
-      </p>
-      <p className="font-['Syne',sans-serif] text-2xl font-bold tracking-tight text-[#e8eaf0] leading-none">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-1">
+        <p
+          className="font-mono text-[9px] md:text-[10px] tracking-widest uppercase"
+          style={{ color: 'var(--text3)' }}
+        >
+          {label}
+        </p>
+        {isActive && (
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        )}
+      </div>
+
+      {/* Value */}
+      <p
+        className="font-['Syne',sans-serif] text-lg md:text-2xl font-bold tracking-tight mb-1"
+        style={{ color: 'var(--text)' }}
+      >
         {value}
       </p>
-      <div className="flex items-center gap-1.5 mt-1.5">
+
+      {/* Delta */}
+      <div className="flex items-center gap-2 mb-2">
         <span
-          className={clsx(
-            'font-mono text-[11px] font-medium px-1.5 py-0.5 rounded',
-            displayDeltaType === 'up'
-              ? 'bg-emerald-950 text-emerald-400'
-              : 'bg-red-950 text-red-400'
-          )}
+          className="font-mono text-[11px] md:text-xs font-medium"
+          style={{ color: deltaColor }}
         >
-          {displayDeltaType === 'up' ? '▲' : '▼'} {displayDelta}
+          {isUp ? '▲' : isDown ? '▼' : '◆'} {delta}
         </span>
-        <span className="text-[11px] text-[#555c70]">{displaySubtext}</span>
+        {subtext && (
+          <span className="text-[9px] md:text-[10px]" style={{ color: 'var(--text3)' }}>
+            {subtext}
+          </span>
+        )}
       </div>
-      {displaySparkData.length > 0 && (
-        <div className="mt-2.5">
-          <Sparkline data={displaySparkData} color={displaySparkColor} />
+
+      {/* Sparkline */}
+      {sparklineData.length > 0 && (
+        <div className="h-8 md:h-10">
+          <Sparkline data={sparklineData} color={sparkColor} />
         </div>
       )}
-    </button>
+    </div>
   );
 }

@@ -7,11 +7,18 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuth } = useAuthStore();
-  const location   = useLocation();
+  const location = useLocation();
 
   if (!isAuth) {
-    // Save the page they tried to visit so we can redirect after login
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    // Redirect to landing page, not login
+    // Save the attempted location so we can redirect after login
+    return (
+      <Navigate
+        to="/"
+        state={{ from: location.pathname }}
+        replace
+      />
+    );
   }
 
   return <>{children}</>;

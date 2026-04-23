@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { FormField, Input } from '../components/ui/FormField';
@@ -6,9 +6,16 @@ import { FormField, Input } from '../components/ui/FormField';
 export function LoginPage() {
   const navigate  = useNavigate();
   const location  = useLocation();
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, isAuth } = useAuthStore();
 
   const from = (location.state as { from?: string })?.from ?? '/app';
+
+  // If already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (isAuth) {
+      navigate('/app', { replace: true });
+    }
+  }, [isAuth, navigate]);
 
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
@@ -36,23 +43,23 @@ export function LoginPage() {
       <div className="w-full max-w-sm">
 
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 md:mb-8">
           <Link to="/">
             <span
-              className="font-['Syne',sans-serif] text-2xl font-bold tracking-tight"
+              className="font-['Syne',sans-serif] text-xl md:text-2xl font-bold tracking-tight"
               style={{ color: 'var(--text)' }}
             >
               merchant<span className="text-emerald-400">.</span>analytics
             </span>
           </Link>
-          <p className="text-sm mt-2" style={{ color: 'var(--text3)' }}>
+          <p className="text-xs md:text-sm mt-2" style={{ color: 'var(--text3)' }}>
             Sign in to your dashboard
           </p>
         </div>
 
         {/* Card */}
         <div
-          className="rounded-xl p-6 flex flex-col gap-4"
+          className="rounded-xl p-5 sm:p-6 flex flex-col gap-4 w-full"
           style={{
             backgroundColor: 'var(--surface)',
             border: '1px solid var(--border)',
@@ -96,7 +103,7 @@ export function LoginPage() {
             </div>
           </FormField>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <label
               className="flex items-center gap-2 text-xs cursor-pointer select-none"
               style={{ color: 'var(--text2)' }}
@@ -104,7 +111,7 @@ export function LoginPage() {
               <input type="checkbox" className="rounded" />
               Remember me
             </label>
-            <button className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
+            <button className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors text-left sm:text-right">
               Forgot password?
             </button>
           </div>
@@ -116,7 +123,7 @@ export function LoginPage() {
             style={{
               backgroundColor: isLoading ? 'var(--surface3)' : '#22d98a',
               color:           isLoading ? 'var(--text3)'    : '#0d0f12',
-              cursor:          isLoading ? 'not-allowed'      : 'pointer',
+              cursor:          isLoading ? 'not-allowed'     : 'pointer',
             }}
           >
             {isLoading ? 'Signing in...' : 'Sign in'}
@@ -135,7 +142,7 @@ export function LoginPage() {
 
         {/* Demo hint */}
         <div
-          className="mt-4 rounded-lg px-4 py-3 text-xs"
+          className="mt-4 rounded-lg px-3 py-3 md:px-4 text-xs"
           style={{
             backgroundColor: 'var(--surface)',
             border: '1px solid var(--border)',
@@ -147,7 +154,9 @@ export function LoginPage() {
           </p>
           <p>Email: <span style={{ color: 'var(--text2)' }}>tenson@merchant.io</span></p>
           <p>Password: <span style={{ color: 'var(--text2)' }}>demo1234</span></p>
-          <p className="mt-1" style={{ color: 'var(--text3)' }}>Or use any email + password</p>
+          <p className="mt-1 text-[11px]" style={{ color: 'var(--text3)' }}>
+            Or use any email + password to create a demo account
+          </p>
         </div>
       </div>
     </div>

@@ -1,26 +1,35 @@
 import { type ReactNode } from 'react';
-import { clsx } from 'clsx';
 
 interface BadgeProps {
-  children: ReactNode;
-  variant?: 'green' | 'red' | 'amber' | 'blue' | 'default';
-  size?: 'sm' | 'xs';
+  children:  ReactNode;
+  variant?:  'green' | 'red' | 'amber' | 'blue' | 'default';
+  size?:     'sm' | 'xs';
 }
 
-export function Badge({ children, variant = 'default', size = 'sm' }: BadgeProps) {
+const VARIANT_STYLES: Record<string, { bg: string; color: string }> = {
+  green:   { bg: 'var(--green-dim)',  color: 'var(--green)'  },
+  red:     { bg: 'var(--red-dim)',    color: 'var(--red)'    },
+  amber:   { bg: 'var(--amber-dim)', color: 'var(--amber)' },
+  blue:    { bg: 'var(--blue-dim)',   color: 'var(--blue)'   },
+  default: { bg: 'var(--surface3)',   color: 'var(--text2)'  },
+};
+
+export function Badge({
+  children,
+  variant = 'default',
+  size = 'sm',
+}: BadgeProps) {
+  const { bg, color } = VARIANT_STYLES[variant];
+
   return (
     <span
-      className={clsx(
-        'inline-flex items-center font-mono font-medium rounded',
-        size === 'xs' ? 'text-[10px] px-1.5 py-0.5' : 'text-[11px] px-2 py-0.5',
-        {
-          'bg-emerald-950 text-emerald-400':  variant === 'green',
-          'bg-red-950    text-red-400':       variant === 'red',
-          'bg-amber-950  text-amber-400':     variant === 'amber',
-          'bg-blue-950   text-blue-400':      variant === 'blue',
-          'bg-zinc-800   text-zinc-400':      variant === 'default',
-        }
-      )}
+      className="inline-flex items-center font-mono font-medium rounded"
+      style={{
+        fontSize:        size === 'xs' ? '10px' : '11px',
+        padding:         size === 'xs' ? '2px 6px' : '2px 8px',
+        backgroundColor: bg,
+        color,
+      }}
     >
       {children}
     </span>

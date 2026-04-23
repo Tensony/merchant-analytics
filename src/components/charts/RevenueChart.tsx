@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   ResponsiveContainer, ComposedChart, Bar, Line, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Cell,
@@ -52,7 +52,8 @@ function CustomTooltip({ active, payload, label, metric, annotations }: any) {
       className="rounded-lg p-3 shadow-xl text-xs min-w-[160px]"
       style={{
         backgroundColor: 'var(--surface)',
-        border: '1px solid var(--border2)',
+        border:          '1px solid var(--border2)',
+        boxShadow:       '0 4px 16px rgba(0,0,0,0.15)',
       }}
     >
       <p className="font-mono text-[10px] mb-2" style={{ color: 'var(--text3)' }}>
@@ -83,7 +84,7 @@ function CustomTooltip({ active, payload, label, metric, annotations }: any) {
       )}
 
       {point.isAnomaly && (
-        <p className="text-[10px] mt-1 text-amber-400">
+        <p className="text-[10px] mt-1" style={{ color: 'var(--amber)' }}>
           ⚠ Anomaly detected
         </p>
       )}
@@ -159,16 +160,24 @@ export function RevenueChart({
             </linearGradient>
           </defs>
 
-          <CartesianGrid stroke="#2a2f3d" strokeWidth={0.5} vertical={false} />
+          <CartesianGrid 
+            stroke="var(--border)" 
+            strokeWidth={0.5} 
+            vertical={false} 
+          />
           <XAxis
             dataKey="date"
-            tick={{ fill: '#555c70', fontSize: 10, fontFamily: 'DM Mono' }}
-            axisLine={false} tickLine={false} interval={3}
+            tick={{ fill: 'var(--text3)', fontSize: 10, fontFamily: 'DM Mono' }}
+            axisLine={false} 
+            tickLine={false} 
+            interval={3}
           />
           <YAxis
             tickFormatter={yFormatter}
-            tick={{ fill: '#555c70', fontSize: 10, fontFamily: 'DM Mono' }}
-            axisLine={false} tickLine={false} width={48}
+            tick={{ fill: 'var(--text3)', fontSize: 10, fontFamily: 'DM Mono' }}
+            axisLine={false} 
+            tickLine={false} 
+            width={48}
           />
           <Tooltip
             content={
@@ -177,7 +186,7 @@ export function RevenueChart({
                 annotations={annotations}
               />
             }
-            cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+            cursor={{ fill: 'var(--surface2)' }}
           />
 
           {/* Annotation reference lines */}
@@ -201,7 +210,7 @@ export function RevenueChart({
             <Line
               type="monotone"
               dataKey="previous"
-              stroke="#555c70"
+              stroke="var(--text3)"
               strokeWidth={1.5}
               strokeDasharray="4 2"
               dot={false}

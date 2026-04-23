@@ -1,122 +1,107 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { AuthUser } from '../types';
+import { authService } from './authService';
 
-export interface AuthUser {
-  id:     string;
-  name:   string;
-  email:  string;
-  plan:   'starter' | 'growth' | 'pro';
-  avatar: string;
-}
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 interface AuthStore {
-  user:      AuthUser | null;
-  isAuth:    boolean;
-  isLoading: boolean;
-  
-  // Onboarding
+  user:                   AuthUser | null;
+  token:                  string | null;
+  isAuth:                 boolean;
+  isLoading:              boolean;
   hasCompletedOnboarding: boolean;
-  completeOnboarding:     () => void;
 
-  login:    (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout:   () => void;
-  upgradePlan: (plan: AuthUser['plan']) => void;
+  login:              (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register:           (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout:             () => void;
+  upgradePlan:        (plan: AuthUser['plan']) => void;
+  completeOnboarding: () => void;
 }
 
-// Simulated user database — replace with real API later
-const MOCK_USERS: (AuthUser & { password: string })[] = [
-  {
-    id:       'u1',
-    name:     'Tenson C.',
-    email:    'tenson@merchant.io',
-    password: '1234',
-    plan:     'growth',
-    avatar:   'TM',
-  },
-];
+// ── Store ─────────────────────────────────────────────────────────────────────
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set, get) => ({
-      user:      null,
-      isAuth:    false,
-      isLoading: false,
-      
-      // Onboarding state
+    (set) => ({
+      user:                   null,
+      token:                  null,
+      isAuth:                 false,
+      isLoading:              false,
       hasCompletedOnboarding: false,
-      completeOnboarding: () => set({ hasCompletedOnboarding: true }),
 
+      // ── Login ──────────────────────────────────────────────────────────────
       login: async (email, password) => {
         set({ isLoading: true });
-
-        // Simulate network delay
-        await new Promise((r) => setTimeout(r, 900));
-
-        const found = MOCK_USERS.find(
-          (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-        );
-
-        if (found) {
-          const { password: _, ...user } = found;
-          set({ user, isAuth: true, isLoading: false });
+        try {
+          const data = await authService.login({ email, password });
+          set({
+            user:      data.user as AuthUser,
+            token:     data.token.access_token,
+            isAuth:    true,
+            isLoading: false,
+          });
           return { success: true };
-        }
-
-        // Allow any email/password for demo
-        const demoUser: AuthUser = {
-          id:     'demo-' + Date.now(),
-          name:   email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-          email,
-          plan:   'starter',
-          avatar: email.slice(0, 2).toUpperCase(),
-        };
-        set({ user: demoUser, isAuth: true, isLoading: false });
-        return { success: true };
-      },
-
-      register: async (name, email, _password) => {
-        set({ isLoading: true });
-        await new Promise((r) => setTimeout(r, 1000));
-
-        const exists = MOCK_USERS.find(
-          (u) => u.email.toLowerCase() === email.toLowerCase()
-        );
-
-        if (exists) {
+        } catch (err) {
           set({ isLoading: false });
-          return { success: false, error: 'An account with this email already exists.' };
+          return {
+            success: false,
+            error:   err instanceof Error ? err.message : 'Login failed.',
+          };
         }
-
-        const newUser: AuthUser = {
-          id:     'u-' + Date.now(),
-          name,
-          email,
-          plan:   'starter',
-          avatar: name.slice(0, 2).toUpperCase(),
-        };
-
-        set({ user: newUser, isAuth: true, isLoading: false, hasCompletedOnboarding: false });
-        return { success: true };
       },
 
+      // ── Register ───────────────────────────────────────────────────────────
+      register: async (name, email, password) => {
+        set({ isLoading: true });
+        try {
+          const data = await authService.register({ name, email, password });
+          set({
+            user:                   data.user as AuthUser,
+            token:                  data.token.access_token,
+            isAuth:                 true,
+            isLoading:              false,
+            hasCompletedOnboarding: false,
+          });
+          return { success: true };
+        } catch (err) {
+          set({ isLoading: false });
+          return {
+            success: false,
+            error:   err instanceof Error ? err.message : 'Registration failed.',
+          };
+        }
+      },
+
+      // ── Logout ─────────────────────────────────────────────────────────────
       logout: () => {
-        set({ user: null, isAuth: false, hasCompletedOnboarding: false });
+        set({
+          user:                   null,
+          token:                  null,
+          isAuth:                 false,
+          hasCompletedOnboarding: false,
+        });
       },
 
+      // ── Upgrade plan ───────────────────────────────────────────────────────
       upgradePlan: (plan) => {
-        const { user } = get();
-        if (user) {
-          set({ user: { ...user, plan } });
-        }
+        set((state) => ({
+          user: state.user ? { ...state.user, plan } : null,
+        }));
+      },
+
+      // ── Complete onboarding ────────────────────────────────────────────────
+      completeOnboarding: () => {
+        set({ hasCompletedOnboarding: true });
       },
     }),
     {
       name: 'merchant-auth',
-      partialize: (state) => ({ 
-        user: state.user, 
-        isAuth: state.isAuth, 
-        hasCompletedOnboarding: state.hasCompletedOnboarding 
+      partialize: (state) => ({
+        user:                   state.user,
+        token:                  state.token,
+        isAuth:                 state.isAuth,
+        hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),
     }
   )

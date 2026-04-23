@@ -9,11 +9,16 @@ import { KeyboardShortcutsModal } from '../ui/KeyboardShortcutsModal';
 import { useDashboardStore } from '../../store/useDashboardStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { X } from 'lucide-react';
 
 interface NavItem {
   label: string;
   path:  string;
   icon:  string;
+}
+
+interface SidebarProps {
+  onClose?: () => void;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -28,7 +33,7 @@ const BOTTOM_ITEMS: NavItem[] = [
   { label: 'Email digest', path: '/app/email-digest', icon: '✉' },
 ];
 
-export function Sidebar() {
+export function Sidebar({ onClose }: SidebarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -52,14 +57,47 @@ export function Sidebar() {
     .slice(0, 2)
     .toUpperCase();
 
+  const handleSignOut = () => {
+    logout();
+    setTimeout(() => {
+      navigate('/');
+    }, 10);
+  };
+
+  const handleNavClick = () => {
+    if (onClose && window.innerWidth < 768) {
+      onClose();
+    }
+  };
+
   return (
     <aside
-      className="w-[220px] flex-shrink-0 flex flex-col h-screen sticky top-0"
+      className="w-[220px] flex-shrink-0 flex flex-col h-screen sticky top-0 relative"
       style={{
         backgroundColor: 'var(--surface)',
         borderRight: '1px solid var(--border)',
       }}
     >
+      {/* Mobile close button */}
+      <button
+        onClick={onClose}
+        className="md:hidden absolute top-4 right-4 p-1.5 rounded-lg z-10"
+        style={{ 
+          color: 'var(--text3)',
+          backgroundColor: 'var(--surface2)',
+        }}
+        onMouseEnter={(e) => { 
+          e.currentTarget.style.backgroundColor = 'var(--surface3)';
+          e.currentTarget.style.color = 'var(--text)';
+        }}
+        onMouseLeave={(e) => { 
+          e.currentTarget.style.backgroundColor = 'var(--surface2)';
+          e.currentTarget.style.color = 'var(--text3)';
+        }}
+      >
+        <X size={18} />
+      </button>
+
       {/* Keyboard Shortcuts Modal */}
       {showShortcuts && (
         <KeyboardShortcutsModal onClose={() => setShowShortcuts(false)} />
@@ -67,7 +105,7 @@ export function Sidebar() {
 
       {/* Logo */}
       <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--border)' }}>
-        <Link to="/">
+        <Link to="/" onClick={handleNavClick}>
           <span
             className="font-['Syne',sans-serif] text-[15px] font-bold tracking-tight"
             style={{ color: 'var(--text)' }}
@@ -81,12 +119,13 @@ export function Sidebar() {
           </span>
           <Link
             to="/"
+            onClick={handleNavClick}
             className="font-mono text-[9px] transition-colors"
             style={{ color: 'var(--text3)' }}
             onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text3)'; }}
           >
-            ← Back to site
+            ← Home
           </Link>
         </div>
       </div>
@@ -122,7 +161,7 @@ export function Sidebar() {
       </div>
 
       {/* Main nav */}
-      <nav className="flex-1 px-3 py-3 flex flex-col gap-0.5">
+      <nav className="flex-1 px-3 py-3 flex flex-col gap-0.5 overflow-y-auto">
         <p
           className="font-mono text-[9px] tracking-widest uppercase px-2 mb-2"
           style={{ color: 'var(--text3)' }}
@@ -134,6 +173,7 @@ export function Sidebar() {
             key={item.path}
             to={item.path}
             end={item.path === '/app'}
+            onClick={handleNavClick}
             className={({ isActive }) =>
               clsx(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150',
@@ -161,6 +201,7 @@ export function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
+            onClick={handleNavClick}
             className={({ isActive }) =>
               clsx(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150',
@@ -247,9 +288,9 @@ export function Sidebar() {
             <ThemeToggle />
           </div>
 
-          {/* Sign out */}
+          {/* Sign out - goes to HOME page */}
           <button
-            onClick={() => { logout(); navigate('/login'); }}
+            onClick={handleSignOut}
             className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all"
             style={{ color: 'var(--text3)' }}
             onMouseEnter={(e) => {
