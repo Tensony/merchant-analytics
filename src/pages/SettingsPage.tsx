@@ -1,10 +1,13 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Panel, PanelHeader } from '../components/ui/Panel';
 import { FormField, Input, Select } from '../components/ui/FormField';
 import { useDashboardStore } from '../store/useDashboardStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { paymentService } from '../services/paymentService';
+import { shopifyService } from '../services/shopifyService';
 import { triggerAnomalyToast } from '../components/ui/AnomalyToast';
+import type { AuthUser } from '../types';
 
 const TIMEZONE_OPTIONS = [
   { label: 'Africa/Lusaka (CAT)',   value: 'Africa/Lusaka (CAT)'   },
@@ -47,10 +50,37 @@ const NOTIFICATION_ITEMS = [
 export function SettingsPage() {
   const { profile, notifications, updateProfile, updateNotifications } =
     useDashboardStore();
-  const { user } = useAuthStore();
+  const { user, token, upgradePlan } = useAuthStore();
+  const [searchParams] = useSearchParams();
 
   const [localProfile, setLocalProfile] = useState({ ...profile });
   const [isDirty,      setIsDirty]      = useState(false);
+
+  // Shopify state
+  const [shopDomain,    setShopDomain]    = useState('');
+  const [shopifyToken,  setShopifyToken]  = useState('');
+  const [syncing,       setSyncing]       = useState(false);
+  const [syncResult,    setSyncResult]    = useState('');
+
+  // ── Payment callback handler ──────────────────────────────────────────────
+  useEffect(() => {
+    const payment = searchParams.get('payment');
+    const plan    = searchParams.get('plan');
+    const ref     = searchParams.get('reference');
+
+    if (payment === 'success' && plan && ref && token) {
+      paymentService.verifyPayment(ref, plan, token)
+        .then((data) => {
+          if (data.success) {
+            upgradePlan(data.plan as AuthUser['plan']);
+            triggerAnomalyToast(`✓ Successfully upgraded to ${data.plan} plan!`);
+          }
+        })
+        .catch(() => {
+          triggerAnomalyToast('Could not verify payment. Contact support.');
+        });
+    }
+  }, [searchParams, token, upgradePlan]);
 
   function handleProfileChange(field: keyof typeof profile, value: string) {
     setLocalProfile((prev) => ({ ...prev, [field]: value }));
@@ -67,8 +97,38 @@ export function SettingsPage() {
     updateNotifications({ [key]: !notifications[key] });
   }
 
+  // ── Shopify handlers ──────────────────────────────────────────────────────
+  async function handleShopifyConnect() {
+    if (!shopDomain.trim() || !token) return;
+    try {
+      const data = await shopifyService.startOAuth(shopDomain.trim(), token);
+      window.location.href = data.authorization_url;
+    } catch {
+      triggerAnomalyToast('Failed to connect to Shopify.');
+    }
+  }
+
+  async function handleShopifySync() {
+    if (!shopDomain.trim() || !shopifyToken.trim() || !token) return;
+    setSyncing(true);
+    try {
+      const [orders, products] = await Promise.all([
+        shopifyService.syncOrders(shopDomain, shopifyToken, token),
+        shopifyService.syncProducts(shopDomain, shopifyToken, token),
+      ]);
+      setSyncResult(
+        `Synced ${orders.synced} orders and ${products.synced} products from Shopify.`
+      );
+      triggerAnomalyToast(`✓ Synced ${orders.synced} orders + ${products.synced} products`);
+    } catch {
+      triggerAnomalyToast('Sync failed. Check your store domain and access token.');
+    } finally {
+      setSyncing(false);
+    }
+  }
+
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-4 p-4 md:p-6">
 
       {/* Header */}
       <div>
@@ -89,7 +149,7 @@ export function SettingsPage() {
         <div className="p-[18px] flex flex-col gap-4">
 
           {/* Avatar */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-emerald-950 flex items-center justify-center text-emerald-400 font-mono text-lg font-medium flex-shrink-0">
               {localProfile.displayName.slice(0, 2).toUpperCase()}
             </div>
@@ -110,7 +170,7 @@ export function SettingsPage() {
           </div>
 
           {/* Form fields */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField label="Display name">
               <Input
                 type="text"
@@ -149,7 +209,7 @@ export function SettingsPage() {
             <button
               onClick={handleSave}
               disabled={!isDirty}
-              className="text-xs px-4 py-2 rounded-lg font-medium transition-colors"
+              className="text-xs px-4 py-2 rounded-lg font-medium transition-colors w-full sm:w-auto"
               style={{
                 backgroundColor: isDirty ? '#22d98a' : 'var(--surface3)',
                 color:           isDirty ? '#0d0f12' : 'var(--text3)',
@@ -165,7 +225,7 @@ export function SettingsPage() {
       {/* Plan */}
       <Panel>
         <PanelHeader title="Your plan" />
-        <div className="p-[18px] flex items-center justify-between">
+        <div className="p-[18px] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p
               className="text-sm font-medium capitalize"
@@ -184,11 +244,84 @@ export function SettingsPage() {
           {user?.plan !== 'pro' && (
             <Link
               to="/pricing"
-              className="text-xs px-4 py-2 rounded-lg font-medium transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12]"
+              className="text-xs px-4 py-2 rounded-lg font-medium transition-colors bg-emerald-500 hover:bg-emerald-400 text-[#0d0f12] text-center w-full sm:w-auto"
             >
               Upgrade plan
             </Link>
           )}
+        </div>
+      </Panel>
+
+      {/* Shopify Integration */}
+      <Panel>
+        <PanelHeader title="Shopify integration" />
+        <div className="p-[18px] flex flex-col gap-4">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormField label="Store domain">
+              <Input
+                type="text"
+                placeholder="mystore.myshopify.com"
+                value={shopDomain}
+                onChange={(e) => setShopDomain(e.target.value)}
+              />
+            </FormField>
+            <FormField label="Access token (for manual sync)">
+              <Input
+                type="password"
+                placeholder="shpat_xxxxx"
+                value={shopifyToken}
+                onChange={(e) => setShopifyToken(e.target.value)}
+              />
+            </FormField>
+          </div>
+
+          {syncResult && (
+            <div
+              className="rounded-lg px-3 py-2 text-xs"
+              style={{
+                backgroundColor: 'var(--green-dim)',
+                color:           'var(--green)',
+              }}
+            >
+              ✓ {syncResult}
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <button
+              onClick={handleShopifyConnect}
+              disabled={!shopDomain.trim()}
+              className="text-xs px-4 py-2 rounded-lg font-medium transition-all"
+              style={{
+                backgroundColor: shopDomain.trim() ? '#22d98a' : 'var(--surface3)',
+                color:           shopDomain.trim() ? '#0d0f12' : 'var(--text3)',
+                cursor:          shopDomain.trim() ? 'pointer' : 'not-allowed',
+              }}
+            >
+              Connect via OAuth
+            </button>
+            <button
+              onClick={handleShopifySync}
+              disabled={syncing || !shopDomain.trim() || !shopifyToken.trim()}
+              className="text-xs px-4 py-2 rounded-lg transition-all"
+              style={{
+                border:  '1px solid var(--border)',
+                color:   'var(--text2)',
+                cursor:  syncing ? 'not-allowed' : 'pointer',
+                opacity: syncing ? 0.7 : 1,
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--surface2)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+            >
+              {syncing ? 'Syncing...' : '↻ Manual sync'}
+            </button>
+          </div>
+
+          <p className="text-[11px]" style={{ color: 'var(--text3)' }}>
+            OAuth connect redirects you to Shopify to authorize access.
+            Manual sync requires a private app access token from your Shopify admin.
+          </p>
         </div>
       </Panel>
 
@@ -199,7 +332,7 @@ export function SettingsPage() {
           {NOTIFICATION_ITEMS.map((item, i) => (
             <div
               key={item.key}
-              className="flex items-center justify-between py-3"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3"
               style={{
                 borderBottom:
                   i < NOTIFICATION_ITEMS.length - 1
@@ -207,7 +340,7 @@ export function SettingsPage() {
                     : 'none',
               }}
             >
-              <div>
+              <div className="flex-1">
                 <p
                   className="text-xs font-medium"
                   style={{ color: 'var(--text)' }}
@@ -225,7 +358,7 @@ export function SettingsPage() {
               {/* Toggle switch */}
               <div
                 onClick={() => handleNotificationToggle(item.key)}
-                className="flex items-center cursor-pointer flex-shrink-0 rounded-full transition-colors duration-200"
+                className="flex items-center cursor-pointer flex-shrink-0 rounded-full transition-colors duration-200 self-end sm:self-center"
                 style={{
                   width:           '36px',
                   height:          '20px',
@@ -254,7 +387,7 @@ export function SettingsPage() {
       {/* Danger zone */}
       <Panel>
         <PanelHeader title="Danger zone" />
-        <div className="p-[18px] flex items-center justify-between">
+        <div className="p-[18px] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p
               className="text-xs font-medium"
@@ -274,7 +407,7 @@ export function SettingsPage() {
               localStorage.removeItem('merchant-dashboard');
               window.location.reload();
             }}
-            className="text-xs px-4 py-2 rounded-lg font-medium transition-all"
+            className="text-xs px-4 py-2 rounded-lg font-medium transition-all w-full sm:w-auto"
             style={{
               border: '1px solid var(--border)',
               color: '#ff5757',

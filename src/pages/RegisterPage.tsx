@@ -1,11 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { FormField, Input } from '../components/ui/FormField';
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const { register, isLoading } = useAuthStore();
+  const { register, isLoading, isAuth } = useAuthStore();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuth) {
+      navigate('/app', { replace: true });
+    }
+  }, [isAuth, navigate]);
 
   const [name,      setName]      = useState('');
   const [email,     setEmail]     = useState('');
@@ -39,37 +46,37 @@ export function RegisterPage() {
       <div className="w-full max-w-sm">
 
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 md:mb-8">
           <Link to="/">
             <span
-              className="font-['Syne',sans-serif] text-2xl font-bold tracking-tight"
+              className="font-['Syne',sans-serif] text-xl md:text-2xl font-bold tracking-tight"
               style={{ color: 'var(--text)' }}
             >
               merchant<span className="text-emerald-400">.</span>analytics
             </span>
           </Link>
-          <p className="text-sm mt-2" style={{ color: 'var(--text3)' }}>
+          <p className="text-xs md:text-sm mt-2" style={{ color: 'var(--text3)' }}>
             Create your free account
           </p>
         </div>
 
         {/* Plan badge */}
         <div
-          className="flex items-center justify-center gap-2 mb-4 py-2 rounded-lg"
+          className="flex items-center justify-center gap-2 mb-4 py-2 px-3 rounded-lg"
           style={{
             backgroundColor: '#22d98a22',
             border: '1px solid #22d98a44',
           }}
         >
           <span className="text-emerald-400 text-xs">✓</span>
-          <span className="text-xs text-emerald-400 font-medium">
+          <span className="text-[11px] md:text-xs text-emerald-400 font-medium text-center">
             Free Starter plan — no credit card required
           </span>
         </div>
 
         {/* Card */}
         <div
-          className="rounded-xl p-6 flex flex-col gap-4"
+          className="rounded-xl p-5 sm:p-6 flex flex-col gap-4 w-full"
           style={{
             backgroundColor: 'var(--surface)',
             border: '1px solid var(--border)',
@@ -110,8 +117,10 @@ export function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setShowPass((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs transition-colors"
                 style={{ color: 'var(--text3)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text3)'; }}
               >
                 {showPass ? 'Hide' : 'Show'}
               </button>
@@ -129,16 +138,14 @@ export function RegisterPage() {
           </FormField>
 
           {/* Terms */}
-          <label
-            className="flex items-start gap-2.5 cursor-pointer select-none"
-          >
+          <label className="flex items-start gap-2.5 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
               className="mt-0.5 rounded flex-shrink-0"
             />
-            <span className="text-xs leading-relaxed" style={{ color: 'var(--text2)' }}>
+            <span className="text-[11px] md:text-xs leading-relaxed" style={{ color: 'var(--text2)' }}>
               I agree to the{' '}
               <a href="#" className="text-emerald-400 hover:underline">Terms of Service</a>
               {' '}and{' '}
@@ -168,6 +175,24 @@ export function RegisterPage() {
               Sign in
             </Link>
           </p>
+        </div>
+
+        {/* Trust indicators */}
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <div className="flex items-center gap-1.5">
+            <span className="text-emerald-400 text-[10px]">🔒</span>
+            <span className="text-[10px] md:text-xs" style={{ color: 'var(--text3)' }}>Secure</span>
+          </div>
+          <div className="w-0.5 h-0.5 rounded-full bg-border" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-emerald-400 text-[10px]">✓</span>
+            <span className="text-[10px] md:text-xs" style={{ color: 'var(--text3)' }}>Free forever</span>
+          </div>
+          <div className="w-0.5 h-0.5 rounded-full bg-border" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-emerald-400 text-[10px]">↻</span>
+            <span className="text-[10px] md:text-xs" style={{ color: 'var(--text3)' }}>Cancel anytime</span>
+          </div>
         </div>
       </div>
     </div>

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { paymentService } from '../services/paymentService';
 import { Modal } from '../components/ui/Modal';
 import { FormField, Input } from '../components/ui/FormField';
 import { triggerAnomalyToast } from '../components/ui/AnomalyToast';
+import type { AuthUser } from '../types';
 
 interface Tier {
   name:     'starter' | 'growth' | 'pro';
@@ -74,7 +76,7 @@ const EMPTY_FORM: PaymentForm = {
 
 export function PricingPage() {
   const navigate = useNavigate();
-  const { isAuth, user, upgradePlan } = useAuthStore();
+  const { isAuth, user, token, upgradePlan } = useAuthStore();
 
   const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
   const [form,         setForm]         = useState<PaymentForm>(EMPTY_FORM);
@@ -117,15 +119,31 @@ export function PricingPage() {
     if (!validate() || !selectedTier) return;
     setProcessing(true);
 
-    // Simulate payment processing
-    await new Promise((r) => setTimeout(r, 1500));
-
-    upgradePlan(selectedTier.name);
-    setProcessing(false);
-    setSelectedTier(null);
-    setForm(EMPTY_FORM);
-    triggerAnomalyToast(`✓ Upgraded to ${selectedTier.name.charAt(0).toUpperCase() + selectedTier.name.slice(1)} plan!`);
-    navigate('/app');
+    try {
+      if (token) {
+        // Real Paystack payment
+        const data = await paymentService.initializePayment(
+          selectedTier.name,
+          token
+        );
+        // Redirect to Paystack checkout
+        window.location.href = data.authorization_url;
+      } else {
+        // Fallback demo mode — simulate payment
+        await new Promise((r) => setTimeout(r, 1500));
+        upgradePlan(selectedTier.name);
+        setProcessing(false);
+        setSelectedTier(null);
+        setForm(EMPTY_FORM);
+        triggerAnomalyToast(
+          `✓ Upgraded to ${selectedTier.name.charAt(0).toUpperCase() + selectedTier.name.slice(1)} plan!`
+        );
+        navigate('/app');
+      }
+    } catch (err) {
+      setProcessing(false);
+      triggerAnomalyToast('Payment failed. Please try again.');
+    }
   }
 
   return (
@@ -135,7 +153,7 @@ export function PricingPage() {
     >
       {/* Navbar */}
       <nav
-        className="sticky top-0 z-50 px-6 py-4 flex items-center justify-between"
+        className="sticky top-0 z-50 px-6 py-4 flex items-center justify-between backdrop-blur-xl"
         style={{
           backgroundColor: 'var(--bg)',
           borderBottom: '1px solid var(--border)',
@@ -163,6 +181,12 @@ export function PricingPage() {
                 to="/login"
                 className="text-sm px-3 py-1.5 rounded-lg transition-all"
                 style={{ color: 'var(--text2)', border: '1px solid var(--border)' }}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.backgroundColor = 'var(--surface2)';
+                }}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 Sign in
               </Link>
@@ -177,23 +201,23 @@ export function PricingPage() {
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-20">
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-12 md:py-20">
 
         {/* Header */}
-        <div className="text-center mb-14">
+        <div className="text-center mb-10 md:mb-14">
           <p
-            className="font-mono text-[11px] tracking-widest uppercase mb-3"
+            className="font-mono text-[10px] md:text-[11px] tracking-widest uppercase mb-3"
             style={{ color: 'var(--text3)' }}
           >
             Pricing
           </p>
           <h1
-            className="font-['Syne',sans-serif] text-4xl font-bold tracking-tight"
+            className="font-['Syne',sans-serif] text-2xl md:text-4xl font-bold tracking-tight"
             style={{ color: 'var(--text)' }}
           >
             Start free. Scale when you're ready.
           </h1>
-          <p className="text-base mt-3" style={{ color: 'var(--text2)' }}>
+          <p className="text-sm md:text-base mt-3" style={{ color: 'var(--text2)' }}>
             No credit card required to start. Cancel anytime.
           </p>
 
@@ -219,14 +243,14 @@ export function PricingPage() {
         </div>
 
         {/* Pricing cards */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {TIERS.map((tier) => {
             const isCurrent = isAuth && user?.plan === tier.name;
 
             return (
               <div
                 key={tier.name}
-                className="rounded-xl p-6 flex flex-col gap-5 relative"
+                className="rounded-xl p-5 md:p-6 flex flex-col gap-4 md:gap-5 relative transition-all hover:scale-[1.02]"
                 style={{
                   backgroundColor: 'var(--surface)',
                   border: tier.popular
@@ -236,7 +260,7 @@ export function PricingPage() {
               >
                 {tier.popular && (
                   <div
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 font-mono text-[10px] font-medium px-3 py-1 rounded-full whitespace-nowrap"
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 font-mono text-[9px] md:text-[10px] font-medium px-3 py-1 rounded-full whitespace-nowrap animate-pulse"
                     style={{ backgroundColor: tier.color, color: '#0d0f12' }}
                   >
                     Most popular
@@ -245,7 +269,7 @@ export function PricingPage() {
 
                 {isCurrent && (
                   <div
-                    className="absolute -top-3 right-4 font-mono text-[10px] font-medium px-3 py-1 rounded-full"
+                    className="absolute -top-3 right-4 font-mono text-[9px] md:text-[10px] font-medium px-3 py-1 rounded-full"
                     style={{ backgroundColor: 'var(--surface3)', color: 'var(--text2)', border: '1px solid var(--border)' }}
                   >
                     Current plan
@@ -261,7 +285,7 @@ export function PricingPage() {
                   </p>
                   <div className="flex items-baseline gap-1">
                     <span
-                      className="font-['Syne',sans-serif] text-4xl font-bold tracking-tight"
+                      className="font-['Syne',sans-serif] text-3xl md:text-4xl font-bold tracking-tight"
                       style={{ color: tier.color }}
                     >
                       {tier.price}
@@ -272,11 +296,11 @@ export function PricingPage() {
                   </div>
                 </div>
 
-                <ul className="flex flex-col gap-2.5 flex-1">
+                <ul className="flex flex-col gap-2 md:gap-2.5 flex-1">
                   {tier.features.map((feat) => (
                     <li
                       key={feat}
-                      className="flex items-center gap-2 text-xs"
+                      className="flex items-center gap-2 text-[11px] md:text-xs"
                       style={{ color: 'var(--text2)' }}
                     >
                       <span style={{ color: tier.color }}>✓</span>
@@ -288,7 +312,7 @@ export function PricingPage() {
                 <button
                   onClick={() => handleSelectTier(tier)}
                   disabled={isCurrent}
-                  className="w-full py-2.5 rounded-lg text-sm font-medium transition-all"
+                  className="w-full py-2.5 rounded-lg text-sm font-medium transition-all hover:scale-105"
                   style={{
                     backgroundColor: isCurrent
                       ? 'var(--surface3)'
@@ -320,43 +344,43 @@ export function PricingPage() {
         </div>
 
         {/* FAQ */}
-        <div className="mt-20">
+        <div className="mt-16 md:mt-20">
           <h2
-            className="font-['Syne',sans-serif] text-2xl font-bold text-center mb-10 tracking-tight"
+            className="font-['Syne',sans-serif] text-xl md:text-2xl font-bold text-center mb-8 md:mb-10 tracking-tight"
             style={{ color: 'var(--text)' }}
           >
             Frequently asked questions
           </h2>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {[
               {
                 q: 'Can I upgrade or downgrade anytime?',
-                a: 'Yes. You can change your plan at any time. Upgrades take effect immediately. Downgrades take effect at the end of your billing cycle.',
+                a: 'Yes. You can change your plan at any time. Upgrades take effect immediately.',
               },
               {
                 q: 'What payment methods do you accept?',
-                a: 'We accept all major credit and debit cards including Visa, Mastercard, and American Express. Mobile money support coming soon for African markets.',
+                a: 'We accept all major credit and debit cards via Paystack. Mobile money support coming soon.',
               },
               {
                 q: 'Is there a free trial for paid plans?',
-                a: 'Yes — both Growth and Pro plans come with a 14-day free trial. No credit card needed to start the trial.',
+                a: 'Yes — both Growth and Pro plans come with a 14-day free trial.',
               },
               {
                 q: 'What happens to my data if I cancel?',
-                a: 'Your data is retained for 30 days after cancellation. You can export everything to CSV before your account closes.',
+                a: 'Your data is retained for 30 days after cancellation.',
               },
               {
                 q: 'Do you support African currencies?',
-                a: 'Yes. We support ZMW, KES, NGN, GHS, ZAR and more. Your dashboard can display values in your local currency.',
+                a: 'Yes. We support ZMW, KES, NGN, GHS, ZAR and more.',
               },
               {
                 q: 'Is the Starter plan really free forever?',
-                a: 'Yes. The Starter plan is free with no time limit. We only ask you to upgrade when you need more stores, longer history, or advanced features.',
+                a: 'Yes. The Starter plan is free with no time limit.',
               },
             ].map((item) => (
               <div
                 key={item.q}
-                className="rounded-xl p-5"
+                className="rounded-xl p-4 md:p-5"
                 style={{
                   backgroundColor: 'var(--surface)',
                   border: '1px solid var(--border)',
@@ -408,7 +432,7 @@ export function PricingPage() {
                 </span>
               </div>
               <p className="text-[11px] mt-1" style={{ color: 'var(--text3)' }}>
-                Billed monthly · Cancel anytime
+                Billed monthly · Cancel anytime · Powered by Paystack
               </p>
             </div>
 
@@ -461,14 +485,14 @@ export function PricingPage() {
 
             {/* SSL notice */}
             <p className="text-[10px] text-center" style={{ color: 'var(--text3)' }}>
-              🔒 Payments are secured with 256-bit SSL encryption
+              🔒 Payments are secured with 256-bit SSL encryption via Paystack
             </p>
 
             {/* Actions */}
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => { setSelectedTier(null); setForm(EMPTY_FORM); setErrors({}); }}
-                className="flex-1 py-2 rounded-lg text-xs transition-all"
+                className="py-2 rounded-lg text-xs transition-all sm:flex-1"
                 style={{
                   border: '1px solid var(--border)',
                   color: 'var(--text2)',
@@ -481,7 +505,7 @@ export function PricingPage() {
               <button
                 onClick={handlePayment}
                 disabled={processing}
-                className="flex-1 py-2 rounded-lg text-xs font-medium transition-all"
+                className="py-2 rounded-lg text-xs font-medium transition-all sm:flex-1"
                 style={{
                   backgroundColor: processing ? 'var(--surface3)' : '#22d98a',
                   color:           processing ? 'var(--text3)'    : '#0d0f12',

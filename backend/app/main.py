@@ -5,7 +5,7 @@ from datetime import datetime
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.routers import products, orders, customers, campaigns, metrics
+from app.routers import products, orders, customers, campaigns, metrics, auth, payments, integrations
 
 Base.metadata.create_all(bind=engine)
 
@@ -32,6 +32,9 @@ app.include_router(orders.router)
 app.include_router(customers.router)
 app.include_router(campaigns.router)
 app.include_router(metrics.router)
+app.include_router(auth.router)
+app.include_router(payments.router)
+app.include_router(integrations.router)
 
 
 @app.get("/")

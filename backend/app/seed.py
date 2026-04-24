@@ -1,19 +1,47 @@
 from app.database import SessionLocal, engine, Base
 from app.models import Product, Order, Customer, Campaign
+from app.models.user import User
+from app.auth import hash_password
+import uuid
 
 
 def seed():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
-    # Clear existing data
+    # Clear all existing data
     db.query(Campaign).delete()
     db.query(Order).delete()
     db.query(Customer).delete()
     db.query(Product).delete()
+    db.query(User).delete()
     db.commit()
 
-    # Seed products
+    # ── Seed demo users ──────────────────────────────────────────────────────
+    demo_users = [
+        User(
+            id              = str(uuid.uuid4()),
+            name            = "Tenson M.",
+            email           = "tenson@merchant.io",
+            hashed_password = hash_password("demo1234"),
+            plan            = "growth",
+            avatar          = "TM",
+            is_active       = True,
+        ),
+        User(
+            id              = str(uuid.uuid4()),
+            name            = "Admin User",
+            email           = "admin@merchant.io",
+            hashed_password = hash_password("admin123"),
+            plan            = "pro",
+            avatar          = "AU",
+            is_active       = True,
+        ),
+    ]
+    db.add_all(demo_users)
+    db.commit()
+
+    # ── Seed products ────────────────────────────────────────────────────────
     products = [
         Product(id="1", name="Pro Wireless Headphones", category="Electronics", sales=892,  revenue=71360, delta=8.2),
         Product(id="2", name="Ergonomic Desk Chair",    category="Furniture",   sales=341,  revenue=58970, delta=14.7),
@@ -23,7 +51,7 @@ def seed():
     ]
     db.add_all(products)
 
-    # Seed orders
+    # ── Seed orders ──────────────────────────────────────────────────────────
     orders = [
         Order(id="#48291", customer="Alex Mwale",       amount=247.00, status="completed", date="Mar 30"),
         Order(id="#48290", customer="Sarah Chen",       amount=89.99,  status="pending",   date="Mar 30"),
@@ -36,7 +64,7 @@ def seed():
     ]
     db.add_all(orders)
 
-    # Seed customers
+    # ── Seed customers ───────────────────────────────────────────────────────
     customers = [
         Customer(id="c1",  name="Alex Mwale",       email="alex@email.com",   country="Zambia",       total_spend=2840,  orders=12, last_order="Mar 30", status="active"),
         Customer(id="c2",  name="Sarah Chen",       email="sarah@email.com",  country="China",        total_spend=1290,  orders=6,  last_order="Mar 30", status="active"),
@@ -53,7 +81,7 @@ def seed():
     ]
     db.add_all(customers)
 
-    # Seed campaigns
+    # ── Seed campaigns ───────────────────────────────────────────────────────
     campaigns = [
         Campaign(id="camp1", name="Spring Sale Email Blast",    channel="email",  status="completed", budget=2000, spent=1840, impressions=48200,  clicks=3840, conversions=412, revenue=24720, start_date="Mar 01", end_date="Mar 15"),
         Campaign(id="camp2", name="Google Ads — Headphones",    channel="paid",   status="active",    budget=5000, spent=3120, impressions=124000, clicks=6200, conversions=310, revenue=18600, start_date="Mar 10", end_date="Apr 10"),

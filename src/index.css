@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Dark mode (default) ─────────────────────────────────────────────────── */
 :root {
   --bg:        #0d0f12;
   --surface:   #161920;
@@ -12,28 +13,246 @@
   --text:      #e8eaf0;
   --text2:     #8b90a0;
   --text3:     #555c70;
+
+  /* Accent colors */
+  --green:      #22d98a;
+  --green-dim:  #0d3d25;
+  --red:        #ff5757;
+  --red-dim:    #3d0d0d;
+  --amber:      #f5a623;
+  --amber-dim:  #3d2800;
+  --blue:       #4d9cf8;
+  --blue-dim:   #0d2240;
+  --purple:     #a78bfa;
 }
 
+/* ─── Light mode (Enhanced Professional Palette) ──────────────────────────── */
 :root.light {
-  --bg:        #f4f5f7;
-  --surface:   #ffffff;
-  --surface2:  #f0f1f3;
-  --surface3:  #e8e9ec;
-  --border:    #dde0e8;
-  --border2:   #c8ccd6;
-  --text:      #111318;
-  --text2:     #4a5060;
-  --text3:     #8b90a0;
+  /* Softer, professional background - slight blue tint */
+  --bg:        #f8fafc;
+  
+  /* Cards - off-white with subtle warmth */
+  --surface:   #fafbfc;
+  
+  /* Hover states - subtle distinction */
+  --surface2:  #f1f5f9;
+  --surface3:  #e8edf4;
+  
+  /* Borders - soft gray */
+  --border:    #e2e8f0;
+  --border2:   #cbd5e1;
+  
+  /* Text - better contrast hierarchy */
+  --text:      #0f172a;
+  --text2:     #475569;
+  --text3:     #94a3b8;
+
+  /* Accent colors - slightly muted for light mode */
+  --green:      #10b981;
+  --green-dim:  #d1fae5;
+  --red:        #ef4444;
+  --red-dim:    #fee2e2;
+  --amber:      #f59e0b;
+  --amber-dim:  #fef3c7;
+  --blue:       #3b82f6;
+  --blue-dim:   #dbeafe;
+  --purple:     #8b5cf6;
 }
 
+/* ─── Global resets ───────────────────────────────────────────────────────── */
 * {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.1s ease;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background-color: var(--bg);
   color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ─── Smooth theme transitions ────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Exclude elements that should not transition */
+button,
+a,
+input,
+select,
+textarea {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.1s ease,
+    opacity 0.15s ease,
+    transform 0.1s ease;
+}
+
+/* ─── Scrollbar styling ───────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text3);
+}
+
+/* ─── Selection ───────────────────────────────────────────────────────────── */
+::selection {
+  background: var(--green);
+  color: #0d0f12;
+}
+
+:root.light ::selection {
+  background: var(--green);
+  color: #ffffff;
+}
+
+/* ─── Focus rings ─────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Input placeholders ──────────────────────────────────────────────────── */
+::placeholder {
+  color: var(--text3);
+  opacity: 1;
+}
+
+/* ─── Light mode specific overrides ──────────────────────────────────────── */
+
+/* Sidebar in light mode gets a white surface with subtle shadow */
+:root.light aside {
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04);
+}
+
+/* Emerald color adjustments for light mode */
+:root.light .text-emerald-400 {
+  color: #10b981 !important;
+}
+
+:root.light .bg-emerald-400 {
+  background-color: #10b981 !important;
+}
+
+:root.light .hover\:bg-emerald-400:hover {
+  background-color: #059669 !important;
+}
+
+:root.light .bg-emerald-500 {
+  background-color: #10b981 !important;
+}
+
+:root.light .hover\:bg-emerald-500:hover {
+  background-color: #059669 !important;
+}
+
+:root.light .border-emerald-400 {
+  border-color: #10b981 !important;
+}
+
+:root.light .bg-emerald-950 {
+  background-color: #d1fae5 !important;
+}
+
+:root.light .text-emerald-950 {
+  color: #d1fae5 !important;
+}
+
+:root.light .bg-emerald-950\/60 {
+  background-color: rgba(209, 250, 229, 0.8) !important;
+}
+
+:root.light .border-emerald-900\/60 {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Red adjustments */
+:root.light .text-red-400 {
+  color: #ef4444 !important;
+}
+
+:root.light .bg-red-950 {
+  background-color: #fee2e2 !important;
+}
+
+:root.light .bg-red-950\/40 {
+  background-color: rgba(254, 226, 226, 0.8) !important;
+}
+
+:root.light .border-red-500\/40 {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Amber adjustments */
+:root.light .text-amber-400 {
+  color: #f59e0b !important;
+}
+
+:root.light .bg-amber-950 {
+  background-color: #fef3c7 !important;
+}
+
+:root.light .bg-amber-950\/40 {
+  background-color: rgba(254, 243, 199, 0.8) !important;
+}
+
+:root.light .border-amber-500\/40 {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Mobile utilities */
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: flex !important; }
+}
+
+/* Better touch targets for mobile */
+@media (max-width: 768px) {
+  button, a {
+    min-height: 36px;
+  }
+}
+
+/* Print styles for email digest */
+@media print {
+  nav, aside, .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* ─── Animations ──────────────────────────────────────────────────────────── */
+
+/* Slide-in animation for live feed */
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -44,8 +263,8 @@ body {
     transform: translateY(0);
   }
 }
-/* ─── Landing Page Animations ──────────────────────────────────────────────── */
 
+/* Landing Page Animations */
 @keyframes blob {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(30px, -50px) scale(1.1); }
@@ -83,27 +302,7 @@ body {
   to { opacity: 1; }
 }
 
-.animate-blob { animation: blob 7s infinite; }
-.animate-float { animation: float 6s ease-in-out infinite; }
-.animate-marquee { animation: marquee 30s linear infinite; }
-.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
-.animate-gradient { animation: gradient-shift 15s ease infinite; background-size: 200% 200%; }
-.animate-slide-up { animation: slide-up 0.6s ease-out forwards; }
-.animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
-.animation-delay-2000 { animation-delay: 2s; }
-.animation-delay-4000 { animation-delay: 4s; }
-
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Marquee hover pause */
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
-/* ─── Enhanced Animations ─────────────────────────────────────────────────── */
-
+/* Enhanced Animations */
 @keyframes float-particle {
   0% { transform: translateY(0) translateX(0); opacity: 0; }
   10% { opacity: 0.5; }
@@ -146,6 +345,14 @@ html {
   to { opacity: 1; transform: translateX(0); }
 }
 
+/* Animation Classes */
+.animate-blob { animation: blob 7s infinite; }
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-marquee { animation: marquee 30s linear infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+.animate-gradient { animation: gradient-shift 15s ease infinite; background-size: 200% 200%; }
+.animate-slide-up { animation: slide-up 0.6s ease-out forwards; }
+.animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
 .animate-float-particle { animation: float-particle 8s ease-in-out infinite; }
 .animate-grid-pulse { animation: grid-pulse 4s ease-in-out infinite; }
 .animate-shimmer { background: linear-gradient(90deg, transparent, #ffffff08, transparent); background-size: 200% 100%; animation: shimmer 2s infinite; }
@@ -154,6 +361,14 @@ html {
 .animate-border-glow { animation: border-glow 2s ease-in-out infinite; }
 .animate-slide-in-left { animation: slide-in-left 0.6s ease-out forwards; }
 .animate-slide-in-right { animation: slide-in-right 0.6s ease-out forwards; }
+
+.animation-delay-2000 { animation-delay: 2s; }
+.animation-delay-4000 { animation-delay: 4s; }
+
+/* Marquee hover pause */
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
 
 /* Grid pattern background */
 .bg-grid-pattern {
@@ -170,8 +385,19 @@ html {
   border: 1px solid rgba(34, 217, 138, 0.1);
 }
 
+:root.light .glass-card {
+  background: rgba(250, 251, 252, 0.7);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
 /* Tilt effect container */
 .tilt-container {
   transform-style: preserve-3d;
   perspective: 1000px;
+}
+
+/* Pulse animation for connection indicator */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }

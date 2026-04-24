@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { clsx } from 'clsx';
 import type { FunnelStep } from '../../types';
 
 interface FunnelChartProps {
@@ -23,12 +22,15 @@ export function FunnelChart({ steps }: FunnelChartProps) {
       {steps.map((step, i) => (
         <div key={step.name}>
           <div className="flex justify-between items-baseline mb-1.5">
-            <span className="text-xs text-[#8b90a0]">{step.name}</span>
-            <span className="font-mono text-[11px] text-[#555c70]">
+            <span className="text-xs" style={{ color: 'var(--text2)' }}>{step.name}</span>
+            <span className="font-mono text-[11px]" style={{ color: 'var(--text3)' }}>
               {step.count.toLocaleString()}
             </span>
           </div>
-          <div className="h-2 bg-[#252a35] rounded-full overflow-hidden">
+          <div 
+            className="h-2 rounded-full overflow-hidden"
+            style={{ backgroundColor: 'var(--surface3)' }}
+          >
             <div
               ref={(el) => { barRefs.current[i] = el; }}
               className="h-full rounded-full transition-all duration-700 ease-out"

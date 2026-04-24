@@ -108,4 +108,13 @@ export interface AuthState {
   user:       AuthUser | null;
   isAuth:     boolean;
   isLoading:  boolean;
-}// Type definitions 
+}
+export interface Store {
+  id:       string;
+  name:     string;
+  country:  string;
+  flag:     string;
+  currency: string;
+  plan:     string;
+}
+// Type definitions 

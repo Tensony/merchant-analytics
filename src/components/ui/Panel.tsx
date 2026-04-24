@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 
 interface PanelProps {
-  children: ReactNode;
+  children:  ReactNode;
   className?: string;
 }
 
@@ -11,7 +11,7 @@ export function Panel({ children, className }: PanelProps) {
       className={`rounded-xl overflow-hidden ${className ?? ''}`}
       style={{
         backgroundColor: 'var(--surface)',
-        border: '1px solid var(--border)',
+        border:          '1px solid var(--border)',
       }}
     >
       {children}
@@ -20,7 +20,7 @@ export function Panel({ children, className }: PanelProps) {
 }
 
 interface PanelHeaderProps {
-  title: string;
+  title:     string;
   children?: ReactNode;
 }
 

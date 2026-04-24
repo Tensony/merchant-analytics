@@ -7,12 +7,6 @@ interface LiveOrderFeedProps {
   onClear:   () => void;
 }
 
-const STATUS_STYLE = {
-  completed: { bg: 'bg-emerald-950', text: 'text-emerald-400' },
-  pending:   { bg: 'bg-amber-950',   text: 'text-amber-400'   },
-  refunded:  { bg: 'bg-red-950',     text: 'text-red-400'     },
-};
-
 export function LiveOrderFeed({ orders, connected, onClear }: LiveOrderFeedProps) {
   return (
     <div className="flex flex-col h-full">
@@ -24,10 +18,11 @@ export function LiveOrderFeed({ orders, connected, onClear }: LiveOrderFeedProps
       >
         <div className="flex items-center gap-2">
           <span
-            className={clsx(
-              'w-1.5 h-1.5 rounded-full flex-shrink-0',
-              connected ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'
-            )}
+            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+            style={{
+              backgroundColor: connected ? 'var(--green)' : 'var(--red)',
+              animation: connected ? 'pulse 1.5s ease-in-out infinite' : 'none',
+            }}
           />
           <span
             className="font-mono text-[10px] tracking-widest uppercase"
@@ -63,7 +58,6 @@ export function LiveOrderFeed({ orders, connected, onClear }: LiveOrderFeedProps
           </div>
         ) : (
           orders.map((order, i) => {
-            const style = STATUS_STYLE[order.status];
             return (
               <div
                 key={`${order.id}-${order.ts}`}
@@ -76,12 +70,13 @@ export function LiveOrderFeed({ orders, connected, onClear }: LiveOrderFeedProps
               >
                 {/* Status dot */}
                 <span
-                  className={clsx(
-                    'w-1.5 h-1.5 rounded-full flex-shrink-0',
-                    order.status === 'completed' ? 'bg-emerald-400' :
-                    order.status === 'pending'   ? 'bg-amber-400'   :
-                    'bg-red-400'
-                  )}
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{
+                    backgroundColor:
+                      order.status === 'completed' ? 'var(--green)' :
+                      order.status === 'pending'   ? 'var(--amber)' :
+                      'var(--red)',
+                  }}
                 />
 
                 {/* Order info */}
@@ -108,11 +103,17 @@ export function LiveOrderFeed({ orders, connected, onClear }: LiveOrderFeedProps
                       {order.product}
                     </span>
                     <span
-                      className={clsx(
-                        'font-mono text-[9px] px-1.5 py-0.5 rounded flex-shrink-0',
-                        style.bg,
-                        style.text
-                      )}
+                      className="font-mono text-[9px] px-1.5 py-0.5 rounded flex-shrink-0"
+                      style={{
+                        backgroundColor:
+                          order.status === 'completed' ? 'var(--green-dim)' :
+                          order.status === 'pending'   ? 'var(--amber-dim)' :
+                          'var(--red-dim)',
+                        color:
+                          order.status === 'completed' ? 'var(--green)' :
+                          order.status === 'pending'   ? 'var(--amber)' :
+                          'var(--red)',
+                      }}
                     >
                       {order.status}
                     </span>
