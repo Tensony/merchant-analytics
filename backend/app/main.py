@@ -1,13 +1,37 @@
+import os
 import asyncio
 import json
 import random
 from datetime import datetime
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
+from app.database import engine, Base, SessionLocal
+from app.models import Product, Order, Customer, Campaign
+from app.models.user import User
 from app.routers import products, orders, customers, campaigns, metrics, auth, payments, integrations
+from sqlalchemy import inspect
+
+# ── Auto-seed on first run ────────────────────────────────────────────────────
+
+def auto_seed():
+    """Seed database only if tables are empty."""
+    inspector = inspect(engine)
+    if not inspector.has_table("users"):
+        return
+    
+    db = SessionLocal()
+    try:
+        user_count = db.query(User).count()
+        if user_count == 0:
+            from app.seed import seed
+            seed()
+    finally:
+        db.close()
 
 Base.metadata.create_all(bind=engine)
+auto_seed()
+
+# ── FastAPI App ───────────────────────────────────────────────────────────────
 
 app = FastAPI(
     title="Merchant Analytics API",
@@ -21,6 +45,9 @@ app.add_middleware(
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:3000",
+        "https://merchant-analytics.vercel.app",
+        "https://www.merchant-analytics.vercel.app",
+        # Add your actual Vercel URL after deployment
     ],
     allow_credentials=True,
     allow_methods=["*"],
