@@ -76,10 +76,10 @@ export const useAuthStore = create<AuthStore>()(
       // ── Logout ─────────────────────────────────────────────────────────────
       logout: () => {
         set({
-          user:                   null,
-          token:                  null,
-          isAuth:                 false,
-          hasCompletedOnboarding: false,
+          user:   null,
+          token:  null,
+          isAuth: false,
+          // hasCompletedOnboarding intentionally NOT reset
         });
       },
 

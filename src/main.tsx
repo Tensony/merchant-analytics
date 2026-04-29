@@ -7,7 +7,6 @@ import './index.css';
 import { LandingPage }   from './pages/LandingPage';
 import { LoginPage }     from './pages/LoginPage';
 import { RegisterPage }  from './pages/RegisterPage';
-import { PricingPage }   from './pages/PricingPage';
 import { ChangelogPage } from './pages/ChangelogPage';
 import { StatusPage }    from './pages/StatusPage';
 
@@ -34,7 +33,6 @@ const router = createBrowserRouter([
       { index: true,       element: <LandingPage />  },
       { path: 'login',     element: <LoginPage />    },
       { path: 'register',  element: <RegisterPage /> },
-      { path: 'pricing',   element: <PricingPage />  },
       { path: 'changelog', element: <ChangelogPage /> },
       { path: 'status',    element: <StatusPage />    },
     ],
