@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Panel, PanelHeader } from '../components/ui/Panel';
-import { ORDERS, PRODUCTS } from '../data/mockData';
+import { PRODUCTS } from '../data/mockData';
 
 const DIGEST_DATE = 'Week of Mar 25–30, 2024';
 
