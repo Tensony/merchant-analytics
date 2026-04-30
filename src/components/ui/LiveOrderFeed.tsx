@@ -1,4 +1,3 @@
-import { clsx } from 'clsx';
 import type { LiveOrder } from '../../hooks/useRealtimeOrders';
 
 interface LiveOrderFeedProps {

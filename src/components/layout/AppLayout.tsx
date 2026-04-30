@@ -5,7 +5,7 @@ import { ThemeProvider } from './ThemeProvider';
 import { AnomalyToast } from '../ui/AnomalyToast';
 import { OnboardingWizard } from '../ui/OnboardingWizard';
 import { useAuthStore } from '../../store/useAuthStore';
-import { Menu, X } from 'lucide-react';
+import { Menu,} from 'lucide-react';
 
 export function AppLayout() {
   const { hasCompletedOnboarding } = useAuthStore();

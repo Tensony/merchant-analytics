@@ -1,4 +1,3 @@
-import { clsx } from 'clsx';
 import { StatusPill } from './StatusPill';
 import type { Order, OrderStatus } from '../../types';
 

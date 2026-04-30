@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { CountUp } from '../components/ui/CountUp';
-import { TrustBadges } from '../components/ui/TrustBadges';
 import { ParticleBackground } from '../components/ui/ParticleBackground';
 import { TiltCard } from '../components/ui/TiltCard';
 import { ArrowRight, Sparkles, BarChart3, LineChart, PieChart, TrendingUp, Users, Globe, Zap, Shield, CheckCircle, Play, Star, ArrowUpRight } from 'lucide-react';

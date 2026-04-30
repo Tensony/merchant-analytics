@@ -38,7 +38,6 @@ function CustomTooltip({ active, payload, label, metric, annotations }: any) {
   if (!active || !payload?.length) return null;
 
   const point      = payload[0].payload as DailyDataPoint;
-  const color      = METRIC_COLOR[metric as MetricKey];
   const annotation = (annotations as Annotation[])?.find((a) => a.date === label);
 
   const fmt = (v: number) =>
