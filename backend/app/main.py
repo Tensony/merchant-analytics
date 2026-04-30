@@ -46,8 +46,9 @@ app.add_middleware(
         "http://localhost:5174",
         "http://localhost:3000",
         "https://merchant-analytics.vercel.app",
+        "https://merchant-analytics-git-main-tensonys-projects.vercel.app",
+        "https://merchant-analytics-n1dkxj3qt-tensonys-projects.vercel.app",
         "https://www.merchant-analytics.vercel.app",
-        # Add your actual Vercel URL after deployment
     ],
     allow_credentials=True,
     allow_methods=["*"],
